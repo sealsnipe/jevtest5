@@ -109,7 +109,9 @@ Best Practices (aus TypeSafe-Docs):
   Cursor-Infrastruktur). URL+Key nur im Routinen-Panel sichtbar, der Bot selbst kann sie nicht auslesen.
   Offen: öffentlicher Tunnel + Telegram `setWebhook`.
 - Jev auf Deutsch: nicht belegt, wird mit Test 0 geprüft.
-- Parakeet v3 (HandyTTS) als lokales STT auf dem Grok-Bot-Computer: Installation als Skill.
+- STT läuft lokal im Relay (Parakeet v3 via onnx-asr, GPU 0,44 s / 12 s Audio), siehe docs/stt_setup.md.
+  Grok Bot bekommt fertigen Text (`transcribed: true`). Grok Bot hatte vorher eigenmächtig Gemini über
+  OpenRouter genutzt: Key ist nur für Jev, steht jetzt in der Empfang-Routine.
 - Grok Bot hat Lesezugriff auf den lokalen PC (hat Dateien direkt aus `W:\` gelesen). Den
   „erlaubten Bereich" in den Grok-Bot-Einstellungen auf den Projektordner beschränken. Jev-Aktions-Gate
   ist Berater, keine Sperre.

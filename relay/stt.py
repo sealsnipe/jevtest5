@@ -28,10 +28,19 @@ def _load():
     global _model
     if _model is None:
         import onnx_asr  # lazy: heavy import, only when a voice note arrives
+        import onnxruntime as ort
 
+        try:  # CUDA 13 / cuDNN 9 DLLs from the nvidia-* pip wheels (see docs/stt_setup.md)
+            ort.preload_dlls()
+        except Exception:  # noqa: BLE001  – CPU fallback is fine
+            pass
         t0 = time.perf_counter()
         _model = onnx_asr.load_model(MODEL_NAME, providers=["CUDAExecutionProvider", "CPUExecutionProvider"])
         _model._load_ms = round((time.perf_counter() - t0) * 1000)  # type: ignore[attr-defined]
+        try:
+            _model._providers = _model.model.encoder.get_providers()  # type: ignore[attr-defined]
+        except Exception:  # noqa: BLE001
+            _model._providers = ["?"]  # type: ignore[attr-defined]
     return _model
 
 
