@@ -15,9 +15,16 @@ from __future__ import annotations
 
 import os
 import time
+from pathlib import Path
 from typing import Any
 
 import requests
+
+try:  # optional: read OPENROUTER_API_KEY from <repo>/.env if not in the environment
+    from dotenv import load_dotenv
+    load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+except ImportError:
+    pass
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/systemone"
 DEFAULT_MODEL = "typesafe/jev-1.13"  # pinned; "~typesafe/jev-latest" moves

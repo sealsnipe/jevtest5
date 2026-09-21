@@ -55,6 +55,8 @@ SAMPLES: list[tuple[str, str, str]] = [
 
 def main() -> int:
     as_json = "--json" in sys.argv
+    if hasattr(sys.stdout, "reconfigure"):  # Windows console defaults to cp1252
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     if not os.environ.get("OPENROUTER_API_KEY"):
         print("FEHLER: OPENROUTER_API_KEY nicht gesetzt.")
         return 2
