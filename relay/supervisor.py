@@ -140,6 +140,8 @@ def main() -> int:
                     code = proc.p.returncode if proc.p else None
                     proc.restarts += 1
                     log(f"{proc.name} beendet (code {code}), Neustart #{proc.restarts} in {backoff[proc.name]} s")
+                    if proc.restarts in (1, 5, 20):  # crash -> tell the boss, but not on every retry
+                        notify_chef(f"⚠️ Relay: Prozess '{proc.name}' ist abgestürzt (code {code}), Neustart #{proc.restarts}.")
                     time.sleep(backoff[proc.name])
                     backoff[proc.name] = min(backoff[proc.name] * 2, 60)
                     if proc.name == "tunnel":
