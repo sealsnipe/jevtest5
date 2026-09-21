@@ -45,6 +45,7 @@ Jev Layer 2 "Autonomie-Regler" ──► senden  |  Freigabe an Chef
 | 3 | Injection-Firewall (instruiert die Nachricht den Bot? Chef-Impersonation?) | `layers/firewall.py` | offen |
 | 4 | Vollständigkeits-Check (Name, Termin, Rückrufnummer vorhanden?) | `layers/completeness.py` | offen |
 | 5 | QA-Spalte für Excel (erledigt? Ton? Zufriedenheit?) | `layers/qa.py` | offen |
+| 6 | Aktions-Gate (ist diese Dateiaktion/Weitergabe riskant?) | `layers/action_gate.py` | Probe 2026-09-21: 9/10, siehe docs/testlog.md |
 
 Regel: Jede Layer ist eine Funktion `evaluate(state: str, ...) -> dict` mit festen
 Schwellwerten in Code, nicht im Prompt. Schwellwerte in `layers/config.py`.
@@ -95,6 +96,9 @@ Best Practices (aus TypeSafe-Docs):
   → kleines Relay nötig (relay/), alternativ Hookdeck.
 - Jev auf Deutsch: nicht belegt, wird mit Test 0 geprüft.
 - Parakeet v3 (HandyTTS) als lokales STT auf dem Grok-Bot-Computer: Installation als Skill.
+- Grok Bot hat Lesezugriff auf den lokalen PC (hat Dateien direkt aus `W:\` gelesen). Den
+  „erlaubten Bereich" in den Grok-Bot-Einstellungen auf den Projektordner beschränken. Jev-Aktions-Gate
+  ist Berater, keine Sperre.
 - DSGVO: Jev/OpenRouter/xAI sind Auftragsverarbeiter. Für echte Kundendaten AV-Verträge.
 
 ## Konventionen
