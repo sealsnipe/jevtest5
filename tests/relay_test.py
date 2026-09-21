@@ -90,7 +90,7 @@ def run() -> int:
         check("queue: url", args[0] == "https://grokbot.example/webhook")
         check("queue: bearer header", kwargs["headers"] == {"Authorization": "Bearer test-key"})
         payload = kwargs["json"]
-        check("queue: payload keys", set(payload) == {"text", "voice_file", "intent", "urgency", "action", "from_chef", "test", "transcribed", "chat_id", "message_id", "from"})
+        check("queue: payload keys", set(payload) == {"text", "voice_file", "intent", "urgency", "action", "from_chef", "test", "transcribed", "relay_url", "chat_id", "message_id", "from"})
         check("queue: not from chef", payload["from_chef"] is False)
         check("queue: payload values", payload["text"] == "Ich hätte gern einen Termin." and payload["intent"] == "termin"
               and payload["chat_id"] == 1234 and payload["message_id"] == 42 and payload["from"]["username"] == "mueller")

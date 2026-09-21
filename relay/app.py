@@ -37,6 +37,16 @@ from layers import gatekeeper, voice_check  # noqa: E402
 from relay import stt, tts  # noqa: E402
 
 LOG_DIR = Path(os.environ.get("RELAY_LOG_DIR", Path(__file__).resolve().parent.parent / "log"))
+URL_FILE = Path(__file__).resolve().parent.parent / "log" / "relay_url.txt"   # written by relay/supervisor.py
+
+
+def _public_url() -> str | None:
+    """Current tunnel URL, sent along in every payload so the secretary bot always
+    knows where POST /reply lives, even after a tunnel restart."""
+    try:
+        return URL_FILE.read_text(encoding="utf-8").strip() or None
+    except OSError:
+        return os.environ.get("RELAY_PUBLIC_URL")
 WAKE_ACTIONS = {"queue", "urgent"}
 VOICE_PENDING = "voice_pending"
 # Boss plays a customer: "Test: ..." / "Testnachricht ..." at the start -> treated like a
@@ -230,6 +240,7 @@ async def telegram(
         "from_chef": from_chef,
         "test": is_test,
         "transcribed": bool(item.get("transcribed")),
+        "relay_url": _public_url(),
         "chat_id": item["chat_id"],
         "message_id": item["message_id"],
         "from": item["from"],
