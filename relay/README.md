@@ -13,9 +13,12 @@ Telegram schickt nur seinen eigenen Secret-Header, der Grok-Bot-Webhook braucht
 4. `queue`/`urgent` → `POST GROKBOT_WEBHOOK_URL` mit Bearer-Key und Payload:
    ```json
    {"text": "...", "voice_file": null, "intent": "termin", "urgency": 0.33, "action": "queue",
-    "chat_id": 1234, "message_id": 42,
+    "from_chef": false, "test": false, "chat_id": 1234, "message_id": 42,
     "from": {"id": 1234, "username": "mueller", "first_name": "Max", "last_name": null}}
    ```
+   `from_chef`: Nachricht aus `CHEF_CHAT_ID` (Türsteher übersprungen, action immer `queue`; ob es eine
+   Freigabe ist, entscheidet die Sekretärin). `test`: Chef-Nachricht begann mit "Test"/"Testnachricht",
+   Präfix entfernt, wird wie ein Kunde behandelt. Für andere Chats ist das Wort wirkungslos.
 5. Jede Entscheidung landet in `log/<action>.jsonl`. `drop`/`log`/`block` wecken Grok Bot nicht.
 6. Antwort an Telegram ist immer HTTP 200 (sonst retried Telegram das Update).
 

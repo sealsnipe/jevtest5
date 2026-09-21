@@ -88,7 +88,8 @@ def run() -> int:
         check("queue: url", args[0] == "https://grokbot.example/webhook")
         check("queue: bearer header", kwargs["headers"] == {"Authorization": "Bearer test-key"})
         payload = kwargs["json"]
-        check("queue: payload keys", set(payload) == {"text", "voice_file", "intent", "urgency", "action", "chat_id", "message_id", "from"})
+        check("queue: payload keys", set(payload) == {"text", "voice_file", "intent", "urgency", "action", "from_chef", "test", "chat_id", "message_id", "from"})
+        check("queue: not from chef", payload["from_chef"] is False)
         check("queue: payload values", payload["text"] == "Ich hätte gern einen Termin." and payload["intent"] == "termin"
               and payload["chat_id"] == 1234 and payload["message_id"] == 42 and payload["from"]["username"] == "mueller")
         check("queue: logged", len(log_lines("queue")) == 1)
@@ -117,14 +118,33 @@ def run() -> int:
         check("voice: text marker + file id", payload["text"] == "voice_pending" and payload["voice_file"] == "AwACAgIAAxkBAAI")
         check("voice: action queue", payload["action"] == "queue")
 
-    # 5b. message from the boss -> action "chef", forwarded without gatekeeper
+    # 5b. text from the boss -> from_chef, forwarded as queue without gatekeeper
     with mock.patch.object(relay_app.gatekeeper, "evaluate") as ev, mock.patch.object(relay_app.requests, "post") as post:
         post.return_value.status_code = 200
         r = client.post("/telegram", json=tg_update("ja", chat_id=999), headers=HEADERS)
         payload = post.call_args.kwargs["json"]
         check("chef: gatekeeper skipped", not ev.called)
-        check("chef: action chef, forwarded", payload["action"] == "chef" and payload["text"] == "ja" and r.json()["action"] == "chef")
-        check("chef: logged", log_lines("chef")[-1]["chat_id"] == 999)
+        check("chef: from_chef + queue, forwarded", payload["from_chef"] is True and payload["action"] == "queue" and payload["text"] == "ja")
+        check("chef: logged to chef.jsonl", log_lines("chef")[-1]["chat_id"] == 999)
+
+    # 5c. voice note from the boss -> still voice_pending, from_chef, forwarded
+    with mock.patch.object(relay_app.gatekeeper, "evaluate") as ev, mock.patch.object(relay_app.requests, "post") as post:
+        post.return_value.status_code = 200
+        client.post("/telegram", json=tg_update(voice_id="VOICE1", chat_id=999), headers=HEADERS)
+        payload = post.call_args.kwargs["json"]
+        check("chef voice: voice_pending kept", payload["text"] == "voice_pending" and payload["voice_file"] == "VOICE1" and payload["from_chef"] is True)
+
+    # 5d. boss plays customer: "Testnachricht: ..." -> gatekeeper runs, from_chef false, test true
+    with mock.patch.object(relay_app.gatekeeper, "evaluate", return_value=fake_decision("queue")) as ev,          mock.patch.object(relay_app.requests, "post") as post:
+        post.return_value.status_code = 200
+        client.post("/telegram", json=tg_update("Testnachricht: Hallo, ich hätte gern einen Termin.", chat_id=999), headers=HEADERS)
+        payload = post.call_args.kwargs["json"]
+        check("test: prefix stripped, gatekeeper ran", ev.called and ev.call_args.args[0] == "Hallo, ich hätte gern einen Termin.")
+        check("test: flags", payload["test"] is True and payload["from_chef"] is False and payload["text"] == "Hallo, ich hätte gern einen Termin.")
+    with mock.patch.object(relay_app.gatekeeper, "evaluate") as ev, mock.patch.object(relay_app.requests, "post") as post:
+        post.return_value.status_code = 200
+        client.post("/telegram", json=tg_update("Test", chat_id=999), headers=HEADERS)
+        check("test: bare 'Test' stays a chef message", not ev.called and post.call_args.kwargs["json"]["from_chef"] is True)
 
     # 6. update without message (e.g. sticker, channel post) -> ignored
     with mock.patch.object(relay_app.gatekeeper, "evaluate") as ev:

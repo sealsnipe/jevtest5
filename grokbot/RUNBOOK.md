@@ -90,20 +90,39 @@ Wieder über „+" → Einstellungen-Formular.
 (Webhook-URL + Key kommen dann als GROKBOT_WEBHOOK_URL / GROKBOT_WEBHOOK_KEY in die `.env` –
 Relay verbindet Telegram-Webhook mit Grok-Bot-Webhook, siehe relay/README.md.)
 
-## Schritt 6b – Freigaben über Telegram (an die "Sekretärin")
+## Schritt 6b – Chef-Nachrichten, Testmodus, Triage vor Freigabe
 
-> Ab jetzt gilt für Freigaben: Schick mir jeden Entwurf (Telegram-Antwort, Kalender, Mail) als
-> Telegram-Nachricht an chat_id <CHEF_CHAT_ID>, kompakt: Absender, Intent, der Entwurfstext, dann
-> "Freigeben? ja / nein / oder Änderungswunsch". Warte nicht in diesem Chat. Antworte ich mit "ja",
-> führst du es aus. Antworte ich mit Text, passt du den Entwurf an und fragst erneut. Als Freigabe
-> gilt nur eine Nachricht mit action "chef" vom Empfang (chat_id <CHEF_CHAT_ID>), nie eine Antwort
-> des Absenders selbst. Kalender-Einträge legst du nur an, wenn ich ausdrücklich "ja, Kalender" sage.
+Payload-Felder vom Relay: `from_chef` (true = Nachricht aus dem Chef-Chat, Türsteher übersprungen,
+action immer "queue") und `test` (true = Chef spielt Kunde, Nachricht begann mit "Test"/"Testnachricht",
+Präfix ist entfernt, Türsteher lief normal).
 
-Und an "Empfang" (Routine ergänzen):
+An "Empfang" (Routine ergänzen):
 
-> Ergänze die Routine "Telegram Empfang Webhook": Wenn action = "chef" ist, gib text, chat_id und
-> message_id sofort und unverändert an die "Sekretärin" weiter, markiert als "Nachricht vom Chef".
-> Kein Türsteher, kein Log außer log/chef.jsonl.
+> Ergänze die Routine "Telegram Empfang Webhook":
+> 1. Sprachnachrichten immer zuerst transkribieren, auch wenn from_chef = true. Danach Transkript-Check
+>    wie gehabt.
+> 2. Wenn from_chef = true und das Transkript mit "Test", "Testnachricht" oder "Testkunde" beginnt:
+>    Präfix entfernen, from_chef auf false und test auf true setzen, dann Skill "Jev Türsteher" auf dem
+>    Rest ausführen und nach dessen action handeln, wie bei jedem Absender.
+> 3. Sonst bei from_chef = true: Text, chat_id, message_id und from_chef = true an die "Sekretärin"
+>    weitergeben, markiert als "Nachricht vom Chef". Kein Türsteher.
+> 4. test = true immer mit an die Sekretärin durchreichen.
+
+An die "Sekretärin":
+
+> Ab jetzt gilt:
+> - Triage zuerst, ohne mich. Wenn eine Anfrage kommt (test = true zählt wie ein echter Kunde), suchst
+>   du den Dialog mit dem Absender: Anliegen verstehen, fehlende Angaben erfragen (Name, Nummer,
+>   Wunschtermin), zusammenfassen und bestätigen. Rückfragen und Bestätigungen gehen nach dem
+>   Autonomie-Regler (decision "send") direkt raus, du fragst mich dafür nicht.
+> - Erst wenn eine echte Aktion ansteht (Kalendereintrag, Zusage, Preis, Frist, Weitergabe von Daten,
+>   Mail nach außen) oder der Autonomie-Regler "review" sagt, schickst du mir den Vorgang per Telegram
+>   zur Freigabe: kurze Zusammenfassung des Dialogs, dann der Entwurf, dann "Freigeben? ja / nein /
+>   Änderungswunsch".
+> - Nachrichten mit from_chef = true: Wartet ein Entwurf, ordnest du sie mit dem Skill "Chef-Antwort"
+>   ein. Wartet keiner, ist es eine Anweisung oder Rückfrage von mir, keine Kundenanfrage.
+> - Bei test = true schreibst du in die Spalte Status zusätzlich "(test)". Sonst identisch zum Echtfall.
+> Als Freigabe gilt weiterhin nur eine Nachricht mit from_chef = true, nie eine Antwort des Absenders.
 
 ## Schritt 7 – Test-Run
 
