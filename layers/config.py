@@ -49,3 +49,10 @@ TRANSCRIPT_MAX_TRUNCATED = 0.80
 # Normalized risk (0..1): < ASK -> execute, >= ASK -> ask the boss, >= REFUSE -> refuse + log.
 ACTION_ASK_THRESHOLD = 0.50
 ACTION_REFUSE_THRESHOLD = 0.85
+
+# --- Voice check (TTS reply text) ---------------------------------------------
+VOICE_MAX_WORDS = 35
+VOICE_MAX_SENTENCES = 2
+VOICE_MIN_NATURAL = 0.60      # below -> "klingt geschrieben"
+VOICE_MIN_ONE_TOPIC = 0.60    # below -> split into two messages
+VOICE_MAX_FILLER = 0.50       # at or above -> opener/closer present
