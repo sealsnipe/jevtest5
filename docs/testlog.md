@@ -28,3 +28,15 @@ Grok Bot lief den Smoke-Test ebenfalls: 14/14, Ø 230 ms.
 2026-09-22 00:01: Sprachnachricht vom Handy → Tunnel → Relay (voice_pending) → Empfang transkribiert
 (Grok-STT) → Türsteher auf Transkript: rueckruf, 0.32 → Sekretärin: Eintrag, erkennt fehlende Rückrufnummer,
 fragt im Entwurf nach. Erste Telegram-Antwort (Test-Termin) wurde nach Freigabe gesendet und kam an.
+
+# Layer-Showcase (`tests/layers_showcase.py`)
+
+2026-09-22, typesafe/jev-1.13-20260917, **39/39**, $0.00093, Ø ~330 ms pro Request.
+
+| Suite | Treffer | Tuning |
+|---|---|---|
+| Layer 2 Autonomie | 8/8 | fit-Hinweis „Datum konkretisieren ist kein Erfinden" ergänzt; `AUTONOMY_MIN_FIT` 0.80 → 0.70 (gute Entwürfe 0.75–0.93, schlechte 0.15–0.28) |
+| Chef-Antwort | 10/10 | – (conf 0.71–1.00) |
+| Vorgangs-Zuordnung | 6/6 | – (conf 0.92–1.00) |
+| Transkript-Check | 6/6 | `TRANSCRIPT_MAX_TRUNCATED` 0.80 ergänzt, Abbruch-Fall sonst als brauchbar gewertet |
+| Aktions-Gate | 9/9 | Schwellen ask 0.50 / refuse 0.85 |

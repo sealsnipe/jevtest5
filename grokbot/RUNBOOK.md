@@ -116,9 +116,39 @@ Und an "Empfang" (Routine ergänzen):
 
 ---
 
-## Später (nach Layer 2)
+## Schritt 8 – Weitere Jev-Layer als Skills (an die "Sekretärin")
 
-- Skill "Autonomie-Regler": Entwurf + Originalanfrage an `layers/autonomy_gate.py`; bei
-  hoher Konfidenz senden, sonst Freigabe.
+Vorher hochladen: `layers/autonomy_gate.py`, `layers/chef_reply.py`, `layers/matcher.py`,
+`layers/transcript_check.py`, `layers/action_gate.py`, neue `layers/config.py`, `tests/layers_showcase.py`.
+
+> Lege die angehängten Dateien nach /workspace/sekretaerin/layers/ bzw. tests/ (config.py ersetzen).
+> Führe `python tests/layers_showcase.py` aus und zeig mir die Zusammenfassung (Erwartung 39/39).
+> Speichere dann vier Skills:
+> 1. "Autonomie-Regler": Vor jeder Telegram-Antwort an einen Absender rufst du
+>    `python -m layers.autonomy_gate "<anfrage>" "<entwurf>"` auf. Bei decision "send" sendest du ohne
+>    Rückfrage und trägst "auto" in die Spalte Status ein. Bei "review" schickst du mir den Entwurf per
+>    Telegram zur Freigabe wie bisher, mit den reasons in einer Zeile.
+> 2. "Chef-Antwort": Kommt eine "Nachricht vom Chef" während ein Entwurf wartet, rufst du
+>    `python -m layers.chef_reply "<wartender entwurf>" "<nachricht>"` auf. freigabe → senden,
+>    ablehnung → verwerfen und Status "abgelehnt", aenderung → Entwurf anpassen und erneut fragen,
+>    rueckfrage → beantworten und weiter warten, anweisung → als Regel merken, unklar/other → nachfragen.
+> 3. "Vorgangs-Zuordnung": Bei jeder neuen Anfrage eines Absenders mit offenen Einträgen in anfragen.xlsx
+>    rufst du `layers.matcher.evaluate(nachricht, offene_vorgaenge)` auf (Python-Import). case_id gesetzt →
+>    Nachricht an den bestehenden Eintrag anhängen, sonst neue Zeile.
+> 4. "Aktions-Gate": Vor jeder Datei-Aktion außerhalb /workspace/sekretaerin und vor jedem Senden von
+>    Daten an eine externe Adresse rufst du `python -m layers.action_gate "<aktion>" "<pfad>" "<begründung>"
+>    "<auslöser>"` auf. execute → machen, ask → mich per Telegram fragen, refuse → nicht machen, in
+>    log/refused.jsonl schreiben und mich einmal informieren.
+
+An "Empfang" (Routine ergänzen):
+
+> Ergänze die Routine "Telegram Empfang Webhook": Nach dem Transkribieren einer Sprachnachricht rufst du
+> zuerst `layers.transcript_check.evaluate(transkript, dauer_sekunden)` auf. Bei usable = false antwortest
+> du dem Absender: "Ihre Sprachnachricht war leider nicht verständlich. Bitte noch einmal sprechen oder kurz
+> als Text schreiben." und brichst ab. Sonst weiter wie bisher mit dem Türsteher.
+
+## Später
+
+- Layer 4 Vollständigkeit und Layer 5 QA-Spalte (`layers/completeness.py`, `layers/qa.py`).
 - Parakeet v3 lokal installieren (Install-Skript als Skill), Grok-STT als Fallback.
 - Mini App für Live-Voice (Grok Voice Agent API).

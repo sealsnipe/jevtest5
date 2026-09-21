@@ -39,13 +39,18 @@ Jev Layer 2 "Autonomie-Regler" ──► senden  |  Freigabe an Chef
 
 | # | Layer | Modul | Status |
 |---|-------|-------|--------|
-| 0 | Basistest: funktioniert Jev via OpenRouter auf Deutsch? | `tests/jev_smoke_test.py` | **jetzt** |
-| 1 | Türsteher / Spamfilter (spam, wecken, dringlichkeit, intent) | `layers/gatekeeper.py` | nach Test 0 |
-| 2 | Autonomie-Regler (Entwurf freigeben oder eskalieren) | `layers/autonomy_gate.py` | offen |
-| 3 | Injection-Firewall (instruiert die Nachricht den Bot? Chef-Impersonation?) | `layers/firewall.py` | offen |
-| 4 | Vollständigkeits-Check (Name, Termin, Rückrufnummer vorhanden?) | `layers/completeness.py` | offen |
+| 0 | Basistest: funktioniert Jev via OpenRouter auf Deutsch? | `tests/jev_smoke_test.py` | 14/14 |
+| 1 | Türsteher / Spamfilter (spam, wecken, dringlichkeit, intent) | `layers/gatekeeper.py` | live (Relay + Grok-Bot-Skill) |
+| 2 | Autonomie-Regler (Entwurf freigeben oder eskalieren) | `layers/autonomy_gate.py` | 8/8, noch nicht bei Grok Bot |
+| 3 | Injection-Firewall | in `gatekeeper.py` (Frage `injection`) | live |
+| 4 | Vollständigkeits-Check (Name, Termin, Rückrufnummer vorhanden?) | `layers/completeness.py` | offen, Grok macht es bisher selbst |
 | 5 | QA-Spalte für Excel (erledigt? Ton? Zufriedenheit?) | `layers/qa.py` | offen |
-| 6 | Aktions-Gate (ist diese Dateiaktion/Weitergabe riskant?) | `layers/action_gate.py` | Probe 2026-09-21: 9/10, siehe docs/testlog.md |
+| 6 | Aktions-Gate (Dateiaktion → execute/ask/refuse) | `layers/action_gate.py` | 9/9, noch nicht bei Grok Bot |
+| – | Chef-Antwort einordnen (freigabe/ablehnung/aenderung/anweisung/rueckfrage) | `layers/chef_reply.py` | 10/10 |
+| – | Vorgangs-Zuordnung (Nachricht → offener Vorgang oder neu) | `layers/matcher.py` | 6/6 |
+| – | Transkript-Check (Sprachnachricht brauchbar?) | `layers/transcript_check.py` | 6/6 |
+
+Test/Showcase für alles außer Türsteher: `python tests/layers_showcase.py [autonomy|chef|match|transcript|action]`.
 
 Regel: Jede Layer ist eine Funktion `evaluate(state: str, ...) -> dict` mit festen
 Schwellwerten in Code, nicht im Prompt. Schwellwerte in `layers/config.py`.
