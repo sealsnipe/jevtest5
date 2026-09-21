@@ -21,11 +21,12 @@ In der App: „+" → neuer Bot → rechts „Einstellungen" ausfüllen (Formula
 
 ## Schritt 2 – Telegram-Connector installieren
 
-> Öffne den Marketplace und installiere das Telegram-Plugin (grokbot-telegram oder Composio).
+> Öffne den Marketplace und installiere das Telegram-Plugin über Composio.
 > Konfiguriere es im Bot-API-Modus mit dem Token, das ich dir über die sichere Secret-Eingabe gebe.
 > Bestätige mir, wenn du eine Testnachricht aus meinem Telegram-Chat lesen kannst.
 
 (Token NICHT in den Chat tippen – die Secret-Eingabe des Plugins benutzen.)
+(Stand 2026-09-21: ein eigenes „grokbot-telegram"-Plugin gibt es im Marketplace nicht, nur Composio.)
 
 ## Schritt 3 – Jev-Türsteher als Skill installieren
 

@@ -83,7 +83,7 @@ Best Practices (aus TypeSafe-Docs):
 - Connectors = Plugins aus Marketplace (`@` im Chat). Skills per `/`. Routinen: Zeitplan,
   Slack/GitHub/Teams/Linear/Sentry/PagerDuty-Events **und Webhook** (URL + Bearer-Key beim
   Anlegen der Routine unter "Add trigger → Webhook").
-- Telegram-Anbindung: Plugin `grokbot-telegram` (Bot-API + User-Account-Modus) oder Composio.
+- Telegram-Anbindung: über Composio (Bot-API-Modus). Ein eigenes `grokbot-telegram`-Plugin gibt es im Marketplace nicht (geprüft 2026-09-21).
 - Kontingent: wöchentlich, zählt Agent-Schritte + Tokens. Schwärme laufen schnell leer.
   → 2–3 Bots reichen: "Empfang", "Sekretärin", optional "Chef/Koordination".
 - Voice: Grok Voice Agent API (Realtime, WebSocket, OpenAI-Realtime-kompatibel), STT 25 Sprachen.
