@@ -1,6 +1,6 @@
 """Local text-to-speech for the relay: text -> OGG/Opus voice note, on this PC.
 
-Engine: Piper (piper-tts) with a German voice, default `de_DE-thorsten-medium`
+Engine: Piper (piper-tts) with a German voice, default `de_DE-thorsten-high` (medium is faster but robotic)
 (models/piper/, download see docs/stt_setup.md). No cloud, no key.
 
     from relay.tts import synthesize_ogg
@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_VOICE = ROOT / "models" / "piper" / "de_DE-thorsten-medium.onnx"
+DEFAULT_VOICE = ROOT / "models" / "piper" / "de_DE-thorsten-high.onnx"
 _voice = None
 
 

@@ -54,7 +54,7 @@ Rest korrekt. Zahlen kommen als Wörter, das passt zum Türsteher.
 
 # Lokale Sprachsynthese: Piper im Relay
 
-- Engine `piper-tts` 1.8 (GPL), Stimme `de_DE-thorsten-medium` aus `rhasspy/piper-voices` (63 MB) nach
+- Engine `piper-tts` 1.8 (GPL), Stimme `de_DE-thorsten-high` (114 MB; medium klingt robotisch) aus `rhasspy/piper-voices` (63 MB) nach
   `models/piper/` (gitignored). Download:
   `https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten/medium/de_DE-thorsten-medium.onnx` (+ `.onnx.json`).
 - Install: `pip install --no-deps piper-tts pathvalidate` (ohne `--no-deps` zieht es das CPU-`onnxruntime`
