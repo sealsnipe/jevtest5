@@ -20,13 +20,15 @@ Einzelne Nachricht testen:
 python -m layers.gatekeeper "Hallo, ich hätte gern einen Termin nächste Woche."
 ```
 
+Relay lokal testen (ohne Netz) und starten: siehe `relay/README.md`.
+
 ## Struktur
 
 ```
 CLAUDE.md            Projektkontext für Claude Code
 layers/              Jev-Layer (jev_client, gatekeeper, config, …)
 tests/               Tests mit deutschen Beispielnachrichten
-relay/               Telegram-Webhook → Grok-Bot-Webhook (später)
+relay/               Telegram-Webhook → Türsteher → Grok-Bot-Webhook (FastAPI, relay/app.py)
 grokbot/RUNBOOK.md   Nachrichten, die 1:1 an Grok Bot gehen
-docs/                Notizen, Recherche
+docs/                Notizen, Recherche, testlog.md
 ```
