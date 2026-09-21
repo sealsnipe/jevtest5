@@ -3,8 +3,8 @@
 Liest log/jev_decisions.jsonl (jede Layer-Auswertung: State, Jev-Antworten, Entscheidung)
 und die Relay-Logs log/<action>.jsonl (was mit Telegram-Nachrichten passiert ist).
 
-    uvicorn dashboard.app:app --port 8090
-    -> http://127.0.0.1:8090
+    uvicorn dashboard.app:app --port 8095
+    -> http://127.0.0.1:8095  (8090 ist auf Windows oft reserviert)
 """
 
 from __future__ import annotations

@@ -22,6 +22,19 @@ python -m layers.gatekeeper "Hallo, ich hätte gern einen Termin nächste Woche.
 
 Relay lokal testen (ohne Netz) und starten: siehe `relay/README.md`.
 
+## Dashboard (alle Jev-Entscheidungen)
+
+Jede Layer-Auswertung landet in `log/jev_decisions.jsonl` (State, Jev-Antworten, Entscheidung, Latenz, Kosten).
+
+```powershell
+.\.venv\Scripts\python -m uvicorn dashboard.app:app --port 8095
+```
+
+Dann http://127.0.0.1:8095 öffnen. Kacheln, Verteilung je Layer und Ergebnis, Verlauf mit Filter;
+Klick auf eine Zeile zeigt, was Jev gesehen hat, die Wahrscheinlichkeiten je Frage und die Code-Entscheidung.
+Nur lokal, nicht durch den Tunnel. Daten erzeugen: `python tests/layers_showcase.py` und `python tests/jev_smoke_test.py`.
+
+
 ## Struktur
 
 ```
@@ -30,5 +43,6 @@ layers/              Jev-Layer (jev_client, gatekeeper, config, …)
 tests/               Tests mit deutschen Beispielnachrichten
 relay/               Telegram-Webhook → Türsteher → Grok-Bot-Webhook (FastAPI, relay/app.py)
 grokbot/RUNBOOK.md   Nachrichten, die 1:1 an Grok Bot gehen
-docs/                Notizen, Recherche, testlog.md
+dashboard/           Lokales Dashboard für log/jev_decisions.jsonl (Port 8095)
+docs/                Notizen, Recherche, testlog.md, voice_rules.md
 ```
