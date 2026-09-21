@@ -67,6 +67,20 @@ def notify_chef(text: str) -> None:
         tg("sendMessage", chat_id=chef, text=text)
 
 
+def push_url_to_grokbot(url: str) -> None:
+    """Tell the Empfang routine the new /reply address so it can update relay.env."""
+    hook, key = os.environ.get("GROKBOT_WEBHOOK_URL"), os.environ.get("GROKBOT_WEBHOOK_KEY")
+    if not hook or not key:
+        return
+    payload = {"action": "relay_url", "relay_url": url, "text": f"Relay-URL geändert: {url}",
+               "from_chef": False, "test": False, "chat_id": None, "message_id": None}
+    try:
+        r = requests.post(hook, json=payload, headers={"Authorization": f"Bearer {key}"}, timeout=15)
+        log(f"relay_url an Grok Bot gemeldet: HTTP {r.status_code}")
+    except requests.RequestException as e:
+        log(f"relay_url an Grok Bot melden fehlgeschlagen: {e}")
+
+
 def on_new_url(url: str, first: bool) -> None:
     URL_FILE.write_text(url, encoding="utf-8")
     what = "gestartet" if first else "neu gestartet"
@@ -74,6 +88,7 @@ def on_new_url(url: str, first: bool) -> None:
         # Inbound is long polling; the tunnel only serves POST /reply for the secretary bot.
         # No Telegram message here: planned starts are noise, crashes are reported in main().
         log(f"tunnel url {url} (poll mode, kein Webhook)")
+        push_url_to_grokbot(url)
         return
     secret = os.environ.get("TELEGRAM_WEBHOOK_SECRET", "")
     res: dict = {}

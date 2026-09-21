@@ -97,6 +97,12 @@ Payload-Felder vom Relay: `from_chef` (true = Nachricht aus dem Chef-Chat, Türs
 action immer "queue") und `test` (true = Chef spielt Kunde, Nachricht begann mit "Test"/"Testnachricht",
 Präfix ist entfernt, Türsteher lief normal).
 
+An "Empfang" (Routine ergänzen, Relay-URL-Pflege):
+
+> Ergänze die Routine "Telegram Empfang Webhook": Kommt ein Payload mit action = "relay_url", dann schreibe
+> das Feld relay_url als RELAY_URL in /workspace/sekretaerin/relay.env (RELAY_API_KEY unverändert lassen)
+> und beende die Routine, keine Übergabe an die Sekretärin. Das Relay schickt das bei jedem Adresswechsel.
+
 An "Empfang" (Routine ergänzen):
 
 > Ergänze die Routine "Telegram Empfang Webhook":
