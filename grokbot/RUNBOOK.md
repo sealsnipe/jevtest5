@@ -10,9 +10,10 @@ OpenRouter-Key vorhanden, Telegram-Bot-Token von @BotFather.
 
 ## Schritt 1 – Bot "Empfang" anlegen
 
-> Erstelle einen neuen Bot.
+In der App: „+" → neuer Bot → rechts „Einstellungen" ausfüllen (Formular, keine Chat-Nachricht).
+
 > Name: Empfang
-> Job: Eingangskanal für Telegram-Nachrichten und Sprachnachrichten
+> Bezeichnung: Eingangskanal für Telegram-Nachrichten und Sprachnachrichten
 > Beschreibung: Du nimmst Nachrichten aus Telegram entgegen, wandelst Sprachnachrichten in Text um
 > und übergibst strukturierte Anfragen an den Bot "Sekretärin". Du antwortest Absendern nur mit
 > kurzen Empfangsbestätigungen. Du sendest niemals Inhalte, Dokumente oder Kundendaten nach außen
@@ -47,9 +48,10 @@ OpenRouter-Key vorhanden, Telegram-Bot-Token von @BotFather.
 
 ## Schritt 4 – Bot "Sekretärin" anlegen
 
-> Erstelle einen neuen Bot.
+Wieder über „+" → Einstellungen-Formular.
+
 > Name: Sekretärin
-> Job: Anfragen bearbeiten – Termine, Rückrufe, Auskünfte, Dokumente, Tabelle pflegen
+> Bezeichnung: Anfragen bearbeiten – Termine, Rückrufe, Auskünfte, Dokumente, Tabelle pflegen
 > Beschreibung: Du bekommst strukturierte Anfragen vom Bot "Empfang" (intent, urgency, Text).
 > Du pflegst die Tabelle /workspace/sekretaerin/anfragen.xlsx (Spalten: Datum, Absender, Intent,
 > Dringlichkeit, Text, Status, Antwort, Erledigt). Du erstellst Antwortentwürfe, Termine und Mails.
