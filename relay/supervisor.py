@@ -72,8 +72,8 @@ def on_new_url(url: str, first: bool) -> None:
     what = "gestartet" if first else "neu gestartet"
     if os.environ.get("RELAY_MODE", "poll") == "poll":
         # Inbound is long polling; the tunnel only serves POST /reply for the secretary bot.
+        # No Telegram message here: planned starts are noise, crashes are reported in main().
         log(f"tunnel url {url} (poll mode, kein Webhook)")
-        notify_chef(f"Relay {what} (Polling).\nRückkanal: {url}")
         return
     secret = os.environ.get("TELEGRAM_WEBHOOK_SECRET", "")
     res: dict = {}
