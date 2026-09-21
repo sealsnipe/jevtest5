@@ -70,8 +70,14 @@ def notify_chef(text: str) -> None:
 def on_new_url(url: str, first: bool) -> None:
     URL_FILE.write_text(url, encoding="utf-8")
     secret = os.environ.get("TELEGRAM_WEBHOOK_SECRET", "")
-    res = tg("setWebhook", url=f"{url}/telegram", secret_token=secret, allowed_updates='["message"]')
-    log(f"tunnel url {url} · setWebhook ok={res.get('ok')} {res.get('description', '')}")
+    res: dict = {}
+    for attempt in range(1, 8):  # fresh trycloudflare hostnames take a few seconds to resolve
+        res = tg("setWebhook", url=f"{url}/telegram", secret_token=secret, allowed_updates='["message"]')
+        if res.get("ok"):
+            break
+        log(f"setWebhook Versuch {attempt}: {res.get('description', '')}")
+        time.sleep(5 * attempt)
+    log(f"tunnel url {url} - setWebhook ok={res.get('ok')} {res.get('description', '')}")
     what = "gestartet" if first else "neu gestartet"
     notify_chef(f"Relay {what}.\nURL: {url}\nWebhook: {'ok' if res.get('ok') else 'FEHLER ' + str(res.get('description'))}")
 
