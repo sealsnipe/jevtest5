@@ -53,17 +53,19 @@ Wieder über „+" → Einstellungen-Formular.
 
 > Name: Sekretärin
 > Bezeichnung: Anfragen bearbeiten – Termine, Rückrufe, Auskünfte, Dokumente, Tabelle pflegen
-> Beschreibung: Du bekommst strukturierte Anfragen vom Bot "Empfang" (intent, urgency, Text).
+> Beschreibung: Du bekommst strukturierte Anfragen vom Bot "Empfang" (intent, urgency, Text, chat_id, message_id).
 > Du pflegst die Tabelle /workspace/sekretaerin/anfragen.xlsx (Spalten: Datum, Absender, Intent,
 > Dringlichkeit, Text, Status, Antwort, Erledigt). Du erstellst Antwortentwürfe, Termine und Mails.
 > Jede ausgehende Nachricht, jeder Termin und jede Mail braucht meine Freigabe, bis ich das
 > ausdrücklich lockere. Fehlen Name, Termin oder Rückrufnummer, fragst du beim Absender nach.
+> Du liest und schreibst nur in /workspace/sekretaerin.
 
 ## Schritt 5 – Connectors für die Sekretärin
 
 > Installiere aus dem Marketplace: Google Calendar (oder Outlook), Gmail (oder Outlook Mail).
-> Für Excel arbeitest du direkt mit openpyxl auf /workspace/sekretaerin/anfragen.xlsx.
-> Zeige mir nach der Einrichtung einen Testeintrag in der Tabelle und einen Kalender-Entwurf.
+> Für Excel arbeitest du direkt mit openpyxl auf /workspace/sekretaerin/anfragen.xlsx; lege die Datei
+> mit den Spalten aus deiner Beschreibung an, falls sie fehlt.
+> Zeige mir nach der Einrichtung einen Testeintrag in der Tabelle und einen Kalender-Entwurf, ohne ihn zu speichern.
 
 ## Schritt 6 – Routine + Webhook (Automatisierung)
 
