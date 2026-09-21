@@ -71,12 +71,13 @@ def on_new_url(url: str, first: bool) -> None:
     URL_FILE.write_text(url, encoding="utf-8")
     secret = os.environ.get("TELEGRAM_WEBHOOK_SECRET", "")
     res: dict = {}
-    for attempt in range(1, 16):  # fresh trycloudflare hostnames take 1-3 min to reach Telegram's resolvers
+    for attempt in range(1, 31):  # fresh trycloudflare hostnames take several minutes to reach Telegram's resolvers
         res = tg("setWebhook", url=f"{url}/telegram", secret_token=secret, allowed_updates='["message"]')
         if res.get("ok"):
             break
-        log(f"setWebhook Versuch {attempt}: {res.get('description', '')}")
-        time.sleep(15)
+        if attempt in (1, 5, 10, 20, 30):
+            log(f"setWebhook Versuch {attempt}: {res.get('description', '')}")
+        time.sleep(30)
     log(f"tunnel url {url} - setWebhook ok={res.get('ok')} {res.get('description', '')}")
     what = "gestartet" if first else "neu gestartet"
     notify_chef(f"Relay {what}.\nURL: {url}\nWebhook: {'ok' if res.get('ok') else 'FEHLER ' + str(res.get('description'))}")
