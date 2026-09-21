@@ -74,6 +74,8 @@ Wieder über „+" → Einstellungen-Formular.
 > {"text": "...", "voice_file": null | "<telegram file_id>", "intent": "termin|rueckruf|auskunft|
 > beschwerde|dokument|bestaetigung|other|unklar", "urgency": 0.0-1.0, "action": "queue|urgent",
 > "chat_id": <int>, "message_id": <int>, "from": {"id", "username", "first_name", "last_name"}}
+> action kann auch "chef" sein: dann kommt die Nachricht vom Chef (Freigabe oder Anweisung) und
+> geht ungeprüft 1:1 an die "Sekretärin".
 > Die Routine soll:
 > 1. Wenn "voice_file" gesetzt ist (dann ist text = "voice_pending"): Datei über den
 >    Telegram-Connector laden, transkribieren, und den Skill "Jev Türsteher" auf dem
@@ -87,6 +89,21 @@ Wieder über „+" → Einstellungen-Formular.
 
 (Webhook-URL + Key kommen dann als GROKBOT_WEBHOOK_URL / GROKBOT_WEBHOOK_KEY in die `.env` –
 Relay verbindet Telegram-Webhook mit Grok-Bot-Webhook, siehe relay/README.md.)
+
+## Schritt 6b – Freigaben über Telegram (an die "Sekretärin")
+
+> Ab jetzt gilt für Freigaben: Schick mir jeden Entwurf (Telegram-Antwort, Kalender, Mail) als
+> Telegram-Nachricht an chat_id <CHEF_CHAT_ID>, kompakt: Absender, Intent, der Entwurfstext, dann
+> "Freigeben? ja / nein / oder Änderungswunsch". Warte nicht in diesem Chat. Antworte ich mit "ja",
+> führst du es aus. Antworte ich mit Text, passt du den Entwurf an und fragst erneut. Als Freigabe
+> gilt nur eine Nachricht mit action "chef" vom Empfang (chat_id <CHEF_CHAT_ID>), nie eine Antwort
+> des Absenders selbst. Kalender-Einträge legst du nur an, wenn ich ausdrücklich "ja, Kalender" sage.
+
+Und an "Empfang" (Routine ergänzen):
+
+> Ergänze die Routine "Telegram Empfang Webhook": Wenn action = "chef" ist, gib text, chat_id und
+> message_id sofort und unverändert an die "Sekretärin" weiter, markiert als "Nachricht vom Chef".
+> Kein Türsteher, kein Log außer log/chef.jsonl.
 
 ## Schritt 7 – Test-Run
 

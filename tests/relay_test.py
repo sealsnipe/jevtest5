@@ -20,6 +20,7 @@ os.environ.update({
     "GROKBOT_WEBHOOK_URL": "https://grokbot.example/webhook",
     "GROKBOT_WEBHOOK_KEY": "test-key",
     "RELAY_LOG_DIR": TMP_LOG,
+    "CHEF_CHAT_ID": "999",
 })
 
 from fastapi.testclient import TestClient  # noqa: E402
@@ -30,10 +31,10 @@ client = TestClient(relay_app.app)
 HEADERS = {"X-Telegram-Bot-Api-Secret-Token": "test-secret"}
 
 
-def tg_update(text: str | None = None, voice_id: str | None = None) -> dict:
+def tg_update(text: str | None = None, voice_id: str | None = None, chat_id: int = 1234) -> dict:
     msg = {
         "message_id": 42,
-        "chat": {"id": 1234, "type": "private"},
+        "chat": {"id": chat_id, "type": "private"},
         "from": {"id": 1234, "username": "mueller", "first_name": "Max"},
     }
     if text is not None:
@@ -115,6 +116,15 @@ def run() -> int:
         check("voice: gatekeeper skipped", not ev.called)
         check("voice: text marker + file id", payload["text"] == "voice_pending" and payload["voice_file"] == "AwACAgIAAxkBAAI")
         check("voice: action queue", payload["action"] == "queue")
+
+    # 5b. message from the boss -> action "chef", forwarded without gatekeeper
+    with mock.patch.object(relay_app.gatekeeper, "evaluate") as ev, mock.patch.object(relay_app.requests, "post") as post:
+        post.return_value.status_code = 200
+        r = client.post("/telegram", json=tg_update("ja", chat_id=999), headers=HEADERS)
+        payload = post.call_args.kwargs["json"]
+        check("chef: gatekeeper skipped", not ev.called)
+        check("chef: action chef, forwarded", payload["action"] == "chef" and payload["text"] == "ja" and r.json()["action"] == "chef")
+        check("chef: logged", log_lines("chef")[-1]["chat_id"] == 999)
 
     # 6. update without message (e.g. sticker, channel post) -> ignored
     with mock.patch.object(relay_app.gatekeeper, "evaluate") as ev:

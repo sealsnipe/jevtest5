@@ -7,7 +7,10 @@ runs Layer 1+3 (gatekeeper) so Grok Bot is only woken for real requests.
     uvicorn relay.app:app --host 0.0.0.0 --port 8080
 
 Environment (see .env.example): TELEGRAM_WEBHOOK_SECRET, GROKBOT_WEBHOOK_URL,
-GROKBOT_WEBHOOK_KEY, OPENROUTER_API_KEY. Loaded from .env if present.
+GROKBOT_WEBHOOK_KEY, OPENROUTER_API_KEY, CHEF_CHAT_ID. Loaded from .env if present.
+
+Actions in the payload: queue | urgent (from the gatekeeper), chef (message from
+CHEF_CHAT_ID, e.g. an approval; never filtered).
 """
 
 from __future__ import annotations
@@ -29,7 +32,7 @@ load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 from layers import gatekeeper  # noqa: E402
 
 LOG_DIR = Path(os.environ.get("RELAY_LOG_DIR", Path(__file__).resolve().parent.parent / "log"))
-WAKE_ACTIONS = {"queue", "urgent"}
+WAKE_ACTIONS = {"queue", "urgent", "chef"}
 VOICE_PENDING = "voice_pending"
 
 app = FastAPI(title="Projekt Sekretärin – Relay")
@@ -100,9 +103,13 @@ async def telegram(
     if item is None:
         return {"ok": True, "action": "ignored"}
 
+    # Messages from the boss (approvals, instructions) always go through, no gatekeeper.
+    chef_id = os.environ.get("CHEF_CHAT_ID")
+    if chef_id and str(item["chat_id"]) == chef_id:
+        decision = {"action": "chef", "intent": "chef", "urgency": 1.0, "p_injection": 0.0}
     # Voice notes are transcribed by Grok Bot; the gatekeeper only sees the marker,
     # so they always go through as "queue" and are classified after transcription.
-    if item["voice_file"]:
+    elif item["voice_file"]:
         decision = {"action": "queue", "intent": "unklar", "urgency": 0.5, "p_injection": 0.0}
     else:
         sender_hint = f"Telegram-Nutzer @{item['from']['username']}" if item["from"]["username"] else None
