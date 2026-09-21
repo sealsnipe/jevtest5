@@ -33,6 +33,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 from layers import gatekeeper  # noqa: E402
+from relay import stt  # noqa: E402
 
 LOG_DIR = Path(os.environ.get("RELAY_LOG_DIR", Path(__file__).resolve().parent.parent / "log"))
 WAKE_ACTIONS = {"queue", "urgent"}
@@ -43,6 +44,18 @@ VOICE_PENDING = "voice_pending"
 TEST_PREFIX = re.compile(r"^\W*test(nachricht|kunde)?(?![a-zäöü])[\s:,.\-]*", re.I)
 
 app = FastAPI(title="Projekt Sekretärin – Relay")
+
+STT_ENABLED = bool(os.environ.get("TELEGRAM_BOT_TOKEN")) and os.environ.get("RELAY_STT", "1") != "0"
+
+
+@app.on_event("startup")
+def _warmup() -> None:
+    if STT_ENABLED:
+        try:
+            ms = stt.warmup()
+            _log("info", {"event": "stt_warmup", "model": stt.MODEL_NAME, "load_ms": ms})
+        except Exception as e:  # noqa: BLE001
+            _log("error", {"reason": f"stt warmup: {e}"})
 
 
 def _log(action: str, record: dict[str, Any]) -> None:
@@ -113,17 +126,28 @@ async def telegram(
     # Messages from the boss always go through, no gatekeeper (approvals must not be "log"ged away).
     chef_id = os.environ.get("CHEF_CHAT_ID")
     from_chef = bool(chef_id) and str(item["chat_id"]) == chef_id
+    # Voice note: transcribe locally (Parakeet v3) so the gatekeeper can run on text and
+    # Grok Bot receives plain text. Audio never leaves this machine.
+    stt_meta: dict[str, Any] | None = None
+    if item["voice_file"] and STT_ENABLED:
+        try:
+            item["text"], stt_meta = stt.transcribe_telegram_voice(item["voice_file"])
+            item["transcribed"] = True
+        except Exception as e:  # noqa: BLE001
+            _log("error", {"reason": f"stt: {e}", "voice_file": item["voice_file"]})
+    if item.get("transcribed") and not item["text"]:
+        return {"ok": True, "action": "ignored", "reason": "leeres Transkript"}
+
     is_test = False
-    if from_chef and not item["voice_file"]:
+    if from_chef and item["text"] != VOICE_PENDING:
         m = TEST_PREFIX.match(item["text"])
         if m and len(item["text"]) > m.end():
             is_test, from_chef = True, False
             item["text"] = item["text"][m.end():]
     if from_chef:
         decision = {"action": "queue", "intent": "unklar", "urgency": 0.5, "p_injection": 0.0}
-    # Voice notes are transcribed by Grok Bot; the gatekeeper only sees the marker,
-    # so they always go through as "queue" and are classified after transcription.
-    elif item["voice_file"]:
+    # Voice note without local STT: Grok Bot transcribes, gatekeeper runs there afterwards.
+    elif item["text"] == VOICE_PENDING:
         decision = {"action": "queue", "intent": "unklar", "urgency": 0.5, "p_injection": 0.0}
     else:
         sender_hint = f"Telegram-Nutzer @{item['from']['username']}" if item["from"]["username"] else None
@@ -137,11 +161,12 @@ async def telegram(
         "action": decision["action"],
         "from_chef": from_chef,
         "test": is_test,
+        "transcribed": bool(item.get("transcribed")),
         "chat_id": item["chat_id"],
         "message_id": item["message_id"],
         "from": item["from"],
     }
-    _log("chef" if from_chef else decision["action"], {**payload, "decision": decision})
+    _log("chef" if from_chef else decision["action"], {**payload, "decision": decision, "stt": stt_meta})
 
     status = _wake_grokbot(payload) if decision["action"] in WAKE_ACTIONS else None
     return {"ok": True, "action": decision["action"], "grokbot_status": status}
