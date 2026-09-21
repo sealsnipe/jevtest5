@@ -41,7 +41,7 @@ Jev Layer 2 "Autonomie-Regler" ──► senden  |  Freigabe an Chef
 |---|-------|-------|--------|
 | 0 | Basistest: funktioniert Jev via OpenRouter auf Deutsch? | `tests/jev_smoke_test.py` | 14/14 |
 | 1 | Türsteher / Spamfilter (spam, wecken, dringlichkeit, intent) | `layers/gatekeeper.py` | live (Relay + Grok-Bot-Skill) |
-| 2 | Autonomie-Regler (Entwurf freigeben oder eskalieren) | `layers/autonomy_gate.py` | 8/8, noch nicht bei Grok Bot |
+| 2 | Autonomie-Regler (Entwurf freigeben oder eskalieren) | `layers/autonomy_gate.py` | 8/8, noch nicht bei Grok Bot. Offen: Faktenaussagen-Frage |
 | 3 | Injection-Firewall | in `gatekeeper.py` (Frage `injection`) | live |
 | 4 | Vollständigkeits-Check (Name, Termin, Rückrufnummer vorhanden?) | `layers/completeness.py` | offen, Grok macht es bisher selbst |
 | 5 | QA-Spalte für Excel (erledigt? Ton? Zufriedenheit?) | `layers/qa.py` | offen |
@@ -80,6 +80,10 @@ Best Practices (aus TypeSafe-Docs):
 - Bei `choice` immer eine `other`/`none`-Option anbieten.
 - Beispiele in Kriterien (`{"what":..., "examples":[...]}`) nur, wenn sie wie echte Inputs aussehen.
 - Version pinnen sobald Schwellwerte getunt sind; `response.model` loggen.
+- **Unsicherheit eskalieren, nicht wegrunden.** Nur die Frage prüfen, die die Entscheidung trägt.
+  noul nahe 0.5 oder Score-Masse jenseits der Schwelle ≥ 0.40 → eine Stufe eskalieren (drop/log →
+  queue, send → review, execute → ask), Grok Bot schaut dann drauf. Konfidenz-Feld bei Scores ist
+  kein brauchbares Signal. Details docs/testlog.md.
 
 ## Grok Bot – Fakten (verifiziert 2026-09-21)
 

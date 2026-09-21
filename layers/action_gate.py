@@ -13,7 +13,7 @@ from __future__ import annotations
 from typing import Any
 
 from . import config
-from .jev_client import ask, noul, score
+from .jev_client import ask, noul, score, score_tail_mass
 
 WORKSPACE = "/workspace/sekretaerin"
 
@@ -47,8 +47,12 @@ def decide(answers: dict[str, Any]) -> dict[str, Any]:
         decision = "ask"
     else:
         decision = "execute"
-    return {"decision": decision, "risk": round(risk, 2), "risk_confidence": round(conf, 2),
-            "p_on_task": round(on_task, 2)}
+    unsure: list[str] = []
+    if decision == "execute" and score_tail_mass(answers, "risk", config.ACTION_ASK_THRESHOLD) >= config.ACTION_UNCERTAIN_SCORE_TAIL:
+        unsure.append("risk")
+        decision = "ask"
+    return {"decision": decision, "uncertain": unsure, "risk": round(risk, 2),
+            "risk_confidence": round(conf, 2), "p_on_task": round(on_task, 2)}
 
 
 def evaluate(action: str, path: str, reason: str, trigger: str) -> dict[str, Any]:

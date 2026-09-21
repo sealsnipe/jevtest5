@@ -79,6 +79,21 @@ def ask(
 
 # --- small helpers for reading answers ---------------------------------------
 
+def noul_uncertain(answers: dict, qid: str, band: float) -> bool:
+    """True if a yes/no answer sits too close to 0.5 to act on."""
+    return abs(float(answers[qid]["noul"]) - 0.5) <= band
+
+
+def score_tail_mass(answers: dict, qid: str, threshold_norm: float) -> float:
+    """Probability mass on score levels whose normalized value is >= threshold_norm."""
+    a = answers[qid]
+    probs = a.get("probabilities", {})
+    top = len(a.get("legend", {}) or probs) - 1
+    if top <= 0:
+        return 0.0
+    return sum(float(p) for lvl, p in probs.items() if int(lvl) / top >= threshold_norm)
+
+
 def noul(answers: dict, qid: str) -> float:
     return float(answers[qid]["noul"])
 

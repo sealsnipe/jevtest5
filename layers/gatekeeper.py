@@ -17,7 +17,7 @@ from __future__ import annotations
 from typing import Any
 
 from . import config
-from .jev_client import ask, choice, noul, score
+from .jev_client import ask, choice, noul, noul_uncertain, score
 
 # ---------------------------------------------------------------------------
 # Questions – bundled, evaluated in parallel by Jev.
@@ -99,8 +99,21 @@ def decide(answers: dict[str, Any]) -> dict[str, Any]:
     else:
         action = "queue"
 
+    # Uncertain on the question that carries the decision -> never silently
+    # drop/log, let Grok Bot take a second look.
+    unsure: list[str] = []
+    if action == "drop" and noul_uncertain(answers, "spam", config.UNCERTAIN_NOUL_BAND):
+        unsure.append("spam")
+    if action == "log" and noul_uncertain(answers, "needs_action", config.UNCERTAIN_NOUL_BAND):
+        unsure.append("needs_action")
+    escalated = bool(unsure)
+    if escalated:
+        action = "queue"
+
     return {
         "action": action,          # block | drop | log | queue | urgent
+        "uncertain": unsure,       # question ids Jev was unsure about
+        "escalated": escalated,    # True if action was raised because of uncertainty
         "intent": intent,
         "intent_confidence": round(intent_conf, 2),
         "p_injection": round(p_injection, 2),

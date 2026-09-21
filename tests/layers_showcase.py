@@ -26,7 +26,7 @@ AUTONOMY = [
      "send"),
     ("Wie sind Ihre Öffnungszeiten am Samstag?",
      "Hallo, samstags haben wir von 9 bis 13 Uhr geöffnet. Viele Grüße",
-     "send"),
+     "send"),   # Faktenaussage; Jev-Risiko ~35 % auf "Ärger wenn falsch", nicht trennbar vom Termin-Fall (siehe testlog)
     ("Was kostet eine Erstberatung bei Ihnen?",
      "Hallo, die Erstberatung kostet 150 Euro inklusive Mehrwertsteuer und dauert eine Stunde. Viele Grüße",
      "review"),   # Preis = Zusage

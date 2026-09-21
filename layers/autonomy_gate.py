@@ -12,7 +12,7 @@ from __future__ import annotations
 from typing import Any
 
 from . import config
-from .jev_client import ask, noul, score
+from .jev_client import ask, noul, noul_uncertain, score, score_tail_mass
 
 AUTONOMY_QUESTIONS: dict[str, dict[str, Any]] = {
     "fit": {
@@ -58,10 +58,21 @@ def decide(answers: dict[str, Any]) -> dict[str, Any]:
         reasons.append("enthaelt_zusage")
     if risk >= config.AUTONOMY_RISK_THRESHOLD:
         reasons.append("risiko")
+    unsure: list[str] = []
+    if not reasons:  # would send: is that decision solid?
+        if noul_uncertain(answers, "fit", config.UNCERTAIN_NOUL_BAND):
+            unsure.append("fit")
+        if noul_uncertain(answers, "commitment", config.UNCERTAIN_NOUL_BAND):
+            unsure.append("commitment")
+        if score_tail_mass(answers, "risk", config.AUTONOMY_RISK_THRESHOLD) >= config.UNCERTAIN_SCORE_TAIL:
+            unsure.append("risk")
+        if unsure:
+            reasons.append("unsicher:" + ",".join(unsure))
 
     return {
         "decision": "review" if reasons else "send",
         "reasons": reasons,
+        "uncertain": unsure,
         "p_fit": round(p_fit, 2),
         "p_commitment": round(p_commit, 2),
         "risk": round(risk, 2),
