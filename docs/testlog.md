@@ -22,3 +22,9 @@ Grok Bot lief den Smoke-Test ebenfalls: 14/14, Ø 230 ms.
 
 2026-09-21 23:40: lokales Relay (uvicorn :8080) mit gefälschtem Telegram-Update → Jev queue/termin/0.52 (519 ms)
 → POST an Grok-Bot-Webhook → HTTP 200. Eintrag in log/queue.jsonl.
+
+# Erster echter Telegram-Durchlauf
+
+2026-09-22 00:01: Sprachnachricht vom Handy → Tunnel → Relay (voice_pending) → Empfang transkribiert
+(Grok-STT) → Türsteher auf Transkript: rueckruf, 0.32 → Sekretärin: Eintrag, erkennt fehlende Rückrufnummer,
+fragt im Entwurf nach. Erste Telegram-Antwort (Test-Termin) wurde nach Freigabe gesendet und kam an.
