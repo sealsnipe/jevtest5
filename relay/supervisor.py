@@ -95,8 +95,9 @@ class Proc:
         self.restarts = 0
 
     def start(self) -> None:
+        flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)  # no console window on Windows (we run under pythonw)
         self.p = subprocess.Popen(self.cmd, cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                  text=True, encoding="utf-8", errors="replace")
+                                  text=True, encoding="utf-8", errors="replace", creationflags=flags)
         threading.Thread(target=self._pump, daemon=True).start()
         log(f"{self.name} gestartet (pid {self.p.pid})")
 
