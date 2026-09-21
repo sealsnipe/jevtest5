@@ -119,11 +119,12 @@ Und an "Empfang" (Routine ergänzen):
 ## Schritt 8 – Weitere Jev-Layer als Skills (an die "Sekretärin")
 
 Vorher hochladen: `layers/autonomy_gate.py`, `layers/chef_reply.py`, `layers/matcher.py`,
-`layers/transcript_check.py`, `layers/action_gate.py`, neue `layers/config.py`, `tests/layers_showcase.py`.
+`layers/transcript_check.py`, `layers/action_gate.py`, `layers/voice_check.py`, neue `layers/config.py`,
+`tests/layers_showcase.py`, `docs/voice_rules.md`.
 
 > Lege die angehängten Dateien nach /workspace/sekretaerin/layers/ bzw. tests/ (config.py ersetzen).
-> Führe `python tests/layers_showcase.py` aus und zeig mir die Zusammenfassung (Erwartung 39/39).
-> Speichere dann vier Skills:
+> Führe `python tests/layers_showcase.py` aus und zeig mir die Zusammenfassung (Erwartung 49/49).
+> Speichere dann fünf Skills:
 > 1. "Autonomie-Regler": Vor jeder Telegram-Antwort an einen Absender rufst du
 >    `python -m layers.autonomy_gate "<anfrage>" "<entwurf>"` auf. Bei decision "send" sendest du ohne
 >    Rückfrage und trägst "auto" in die Spalte Status ein. Bei "review" schickst du mir den Entwurf per
@@ -139,6 +140,14 @@ Vorher hochladen: `layers/autonomy_gate.py`, `layers/chef_reply.py`, `layers/mat
 >    Daten an eine externe Adresse rufst du `python -m layers.action_gate "<aktion>" "<pfad>" "<begründung>"
 >    "<auslöser>"` auf. execute → machen, ask → mich per Telegram fragen, refuse → nicht machen, in
 >    log/refused.jsonl schreiben und mich einmal informieren.
+> 5. "Sprachantwort": Hat der Absender eine Sprachnachricht geschickt, antwortest du ebenfalls mit einer
+>    Sprachnachricht, nach den Regeln in /workspace/sekretaerin/docs/voice_rules.md (lies sie einmal und
+>    merke sie dir). Ablauf: Text nach den Regeln formulieren, dann `python -m layers.voice_check "<text>"`;
+>    bei ok=false nach den hints kürzen und erneut prüfen, maximal zwei Runden, sonst als Text senden;
+>    dann Autonomie-Regler wie bei Text; dann TTS mit deiner Stimme als OGG/Opus (ffmpeg -c:a libopus
+>    -b:a 32k); Telegram sendVoice als Antwort auf die Sprachnachricht; gesprochenen Text in Spalte "Antwort".
+>    Zahlenwerke (Rechnungsnummern, IBAN, Adressen, Listen) immer als Text, dazu eine kurze Voice Note
+>    "Das schicke ich Ihnen als Text". Freigaben an mich immer als Text.
 
 An "Empfang" (Routine ergänzen):
 

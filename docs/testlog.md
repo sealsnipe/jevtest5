@@ -40,3 +40,4 @@ fragt im Entwurf nach. Erste Telegram-Antwort (Test-Termin) wurde nach Freigabe 
 | Vorgangs-Zuordnung | 6/6 | – (conf 0.92–1.00) |
 | Transkript-Check | 6/6 | `TRANSCRIPT_MAX_TRUNCATED` 0.80 ergänzt, Abbruch-Fall sonst als brauchbar gewertet |
 | Aktions-Gate | 9/9 | Schwellen ask 0.50 / refuse 0.85 |
+| Voice-Check | 10/10 | one_topic-Hinweis (Aussage + direkte Rückfrage = ein Anliegen) ergänzt, Standardfall lag vorher bei 0.47 |

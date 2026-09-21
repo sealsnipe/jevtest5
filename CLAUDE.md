@@ -49,8 +49,9 @@ Jev Layer 2 "Autonomie-Regler" ──► senden  |  Freigabe an Chef
 | – | Chef-Antwort einordnen (freigabe/ablehnung/aenderung/anweisung/rueckfrage) | `layers/chef_reply.py` | 10/10 |
 | – | Vorgangs-Zuordnung (Nachricht → offener Vorgang oder neu) | `layers/matcher.py` | 6/6 |
 | – | Transkript-Check (Sprachnachricht brauchbar?) | `layers/transcript_check.py` | 6/6 |
+| – | Voice-Check (Antworttext als TTS-Sprachnachricht tauglich?) | `layers/voice_check.py` + `docs/voice_rules.md` | 10/10 |
 
-Test/Showcase für alles außer Türsteher: `python tests/layers_showcase.py [autonomy|chef|match|transcript|action]`.
+Test/Showcase für alles außer Türsteher: `python tests/layers_showcase.py [autonomy|chef|match|transcript|action|voice]`.
 
 Regel: Jede Layer ist eine Funktion `evaluate(state: str, ...) -> dict` mit festen
 Schwellwerten in Code, nicht im Prompt. Schwellwerte in `layers/config.py`.
@@ -93,7 +94,9 @@ Best Practices (aus TypeSafe-Docs):
 - Kontingent: wöchentlich, zählt Agent-Schritte + Tokens. Schwärme laufen schnell leer.
   → 2–3 Bots reichen: "Empfang", "Sekretärin", optional "Chef/Koordination".
 - Voice: Grok Voice Agent API (Realtime, WebSocket, OpenAI-Realtime-kompatibel), STT 25 Sprachen.
-  Telegram-Bots können keine Calls → Voice Notes (jetzt) / Mini App mit Live-Voice (später).
+  Telegram-**Bots** können keine Calls. Echte Telegram-Anrufe gehen nur über einen **User-Account**
+  (MTProto: Telethon/Pyrogram + py-tgcalls), Beispiel `telegram-call-mcp`. Alternativ Mini App mit
+  Live-Voice. Aktuell: Voice Notes rein (STT) und raus (TTS nach docs/voice_rules.md).
 
 ## Offene Punkte
 
