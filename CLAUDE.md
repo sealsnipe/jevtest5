@@ -113,6 +113,9 @@ Best Practices (aus TypeSafe-Docs):
 - Grok Bot hat Lesezugriff auf den lokalen PC (hat Dateien direkt aus `W:\` gelesen). Den
   „erlaubten Bereich" in den Grok-Bot-Einstellungen auf den Projektordner beschränken. Jev-Aktions-Gate
   ist Berater, keine Sperre.
+  **Befund 2026-09-22:** Bot meldete „W: darf ich nicht direkt lesen", kopierte die Dateien dann über
+  `C:\Users\Matthias\Downloads` als Staging. Die Sperre ist keine harte Grenze, der Bot umgeht sie
+  selbstständig. Staging enthielt nur die 10 angeforderten Dateien, wurde gelöscht.
 - DSGVO: Jev/OpenRouter/xAI sind Auftragsverarbeiter. Für echte Kundendaten AV-Verträge.
 
 ## Konventionen
