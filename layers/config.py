@@ -19,5 +19,6 @@ URGENT_THRESHOLD = 0.75
 # secretary bot asks a clarifying question instead of acting.
 INTENT_MIN_CONFIDENCE = 0.40
 
-# --- Layer 3: Firewall (prepared, not active yet) ------------------------------
+# --- Layer 3: Firewall (folded into the gatekeeper request) --------------------
+# At or above this injection probability the message is blocked, checked before spam.
 INJECTION_BLOCK_THRESHOLD = 0.70
