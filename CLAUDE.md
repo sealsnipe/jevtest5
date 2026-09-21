@@ -92,8 +92,10 @@ Best Practices (aus TypeSafe-Docs):
 
 ## Offene Punkte
 
-- Telegram → Grok-Bot-Webhook braucht Bearer-Header; Telegram schickt nur eigenen Secret-Header
-  → kleines Relay nötig (relay/), alternativ Hookdeck.
+- Relay (relay/app.py) ist gebaut und getestet (2026-09-21): Relay → Jev → Grok-Bot-Webhook antwortet 200.
+  Webhook-URL liegt auf `api2.cursor.sh/automations/webhook/<id>`, Key `crsr_…` (Grok Bot läuft auf
+  Cursor-Infrastruktur). URL+Key nur im Routinen-Panel sichtbar, der Bot selbst kann sie nicht auslesen.
+  Offen: öffentlicher Tunnel + Telegram `setWebhook`.
 - Jev auf Deutsch: nicht belegt, wird mit Test 0 geprüft.
 - Parakeet v3 (HandyTTS) als lokales STT auf dem Grok-Bot-Computer: Installation als Skill.
 - Grok Bot hat Lesezugriff auf den lokalen PC (hat Dateien direkt aus `W:\` gelesen). Den
