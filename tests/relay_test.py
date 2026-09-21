@@ -23,6 +23,7 @@ os.environ.update({
     "CHEF_CHAT_ID": "999",
     "TELEGRAM_BOT_TOKEN": "123:test-token",
     "RELAY_API_KEY": "relay-key",
+    "RELAY_POLL": "0",          # no live poller thread in tests
 })
 
 from fastapi.testclient import TestClient  # noqa: E402

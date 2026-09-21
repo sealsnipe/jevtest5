@@ -69,6 +69,12 @@ def notify_chef(text: str) -> None:
 
 def on_new_url(url: str, first: bool) -> None:
     URL_FILE.write_text(url, encoding="utf-8")
+    what = "gestartet" if first else "neu gestartet"
+    if os.environ.get("RELAY_MODE", "poll") == "poll":
+        # Inbound is long polling; the tunnel only serves POST /reply for the secretary bot.
+        log(f"tunnel url {url} (poll mode, kein Webhook)")
+        notify_chef(f"Relay {what} (Polling).\nRückkanal: {url}")
+        return
     secret = os.environ.get("TELEGRAM_WEBHOOK_SECRET", "")
     res: dict = {}
     for attempt in range(1, 31):  # fresh trycloudflare hostnames take several minutes to reach Telegram's resolvers
@@ -79,7 +85,6 @@ def on_new_url(url: str, first: bool) -> None:
             log(f"setWebhook Versuch {attempt}: {res.get('description', '')}")
         time.sleep(30)
     log(f"tunnel url {url} - setWebhook ok={res.get('ok')} {res.get('description', '')}")
-    what = "gestartet" if first else "neu gestartet"
     notify_chef(f"Relay {what}.\nURL: {url}\nWebhook: {'ok' if res.get('ok') else 'FEHLER ' + str(res.get('description'))}")
 
 

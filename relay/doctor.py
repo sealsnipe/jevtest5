@@ -18,7 +18,7 @@ from __future__ import annotations
 import json
 import os
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import requests
@@ -56,12 +56,23 @@ def check() -> list[str]:
             problems.append(f"tunnel: nicht erreichbar ({type(e).__name__})")
 
     token = os.environ.get("TELEGRAM_BOT_TOKEN")
+    poll_mode = os.environ.get("RELAY_MODE", "poll") == "poll"
+    if poll_mode:
+        hb = LOG_DIR / "poll_heartbeat.txt"
+        try:
+            age = time.time() - datetime.fromisoformat(hb.read_text().strip()).timestamp()
+            if age > 120:
+                problems.append(f"polling: letzter Heartbeat vor {int(age // 60)} min")
+        except (OSError, ValueError):
+            problems.append("polling: kein Heartbeat (Poller nie gelaufen?)")
     if token:
         try:
             info = requests.get(f"https://api.telegram.org/bot{token}/getWebhookInfo", timeout=10).json().get("result", {})
-            if url and info.get("url") != f"{url}/telegram":
+            if poll_mode and info.get("url"):
+                problems.append(f"webhook gesetzt ({info['url']}), blockiert das Polling")
+            if not poll_mode and url and info.get("url") != f"{url}/telegram":
                 problems.append(f"webhook: zeigt auf {info.get('url') or 'nichts'}, erwartet {url}/telegram")
-            if info.get("last_error_message"):
+            if not poll_mode and info.get("last_error_message"):
                 age = int(time.time()) - int(info.get("last_error_date", 0))
                 if age < 1800:
                     problems.append(f"webhook: Telegram meldet '{info['last_error_message']}' (vor {age // 60} min)")
