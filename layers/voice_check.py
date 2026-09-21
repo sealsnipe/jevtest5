@@ -15,7 +15,7 @@ import re
 from typing import Any
 
 from . import config
-from .jev_client import ask, noul
+from .jev_client import ask, noul, record
 
 VOICE_QUESTIONS: dict[str, dict[str, Any]] = {
     "natural": {
@@ -104,10 +104,12 @@ def decide(answers: dict[str, Any], static_hints: list[str]) -> dict[str, Any]:
 
 def evaluate(text: str) -> dict[str, Any]:
     static_hints = check_static(text)
-    res = ask({"antworttext": text}, VOICE_QUESTIONS)
+    state = {"antworttext": text}
+    res = ask(state, VOICE_QUESTIONS)
     d = decide(res["answers"], static_hints)
     d["latency_ms"] = res.get("latency_ms")
     d["cost_usd"] = res.get("usage", {}).get("cost")
+    record("voice_check", state, res, d)
     return d
 
 

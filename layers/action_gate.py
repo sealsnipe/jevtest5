@@ -13,7 +13,7 @@ from __future__ import annotations
 from typing import Any
 
 from . import config
-from .jev_client import ask, noul, score, score_tail_mass
+from .jev_client import ask, noul, record, score, score_tail_mass
 
 WORKSPACE = "/workspace/sekretaerin"
 
@@ -56,10 +56,12 @@ def decide(answers: dict[str, Any]) -> dict[str, Any]:
 
 
 def evaluate(action: str, path: str, reason: str, trigger: str) -> dict[str, Any]:
-    res = ask({"aktion": action, "pfad": path, "begruendung": reason, "ausloeser": trigger}, ACTION_QUESTIONS)
+    state = {"aktion": action, "pfad": path, "begruendung": reason, "ausloeser": trigger}
+    res = ask(state, ACTION_QUESTIONS)
     d = decide(res["answers"])
     d["latency_ms"] = res.get("latency_ms")
     d["cost_usd"] = res.get("usage", {}).get("cost")
+    record("action_gate", state, res, d)
     return d
 
 

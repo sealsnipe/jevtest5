@@ -12,7 +12,7 @@ from __future__ import annotations
 from typing import Any
 
 from . import config
-from .jev_client import ask, choice
+from .jev_client import ask, choice, record
 
 CHEF_REPLY_QUESTIONS: dict[str, dict[str, Any]] = {
     "kind": {
@@ -40,10 +40,12 @@ def decide(answers: dict[str, Any]) -> dict[str, Any]:
 
 
 def evaluate(pending_draft: str, chef_message: str) -> dict[str, Any]:
-    res = ask({"wartender_entwurf": pending_draft, "antwort_chef": chef_message}, CHEF_REPLY_QUESTIONS)
+    state = {"wartender_entwurf": pending_draft, "antwort_chef": chef_message}
+    res = ask(state, CHEF_REPLY_QUESTIONS)
     d = decide(res["answers"])
     d["latency_ms"] = res.get("latency_ms")
     d["cost_usd"] = res.get("usage", {}).get("cost")
+    record("chef_reply", state, res, d)
     return d
 
 

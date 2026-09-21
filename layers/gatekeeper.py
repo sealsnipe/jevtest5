@@ -17,7 +17,7 @@ from __future__ import annotations
 from typing import Any
 
 from . import config
-from .jev_client import ask, choice, noul, noul_uncertain, score
+from .jev_client import ask, choice, noul, noul_uncertain, record, score
 
 # ---------------------------------------------------------------------------
 # Questions – bundled, evaluated in parallel by Jev.
@@ -136,6 +136,7 @@ def evaluate(message: str, sender_hint: str | None = None) -> dict[str, Any]:
     decision["latency_ms"] = res.get("latency_ms")
     decision["cost_usd"] = res.get("usage", {}).get("cost")
     decision["model"] = res.get("model")
+    record("gatekeeper", state, res, decision)
     return decision
 
 

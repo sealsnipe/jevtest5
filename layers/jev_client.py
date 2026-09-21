@@ -13,8 +13,10 @@ Usage:
 
 from __future__ import annotations
 
+import json
 import os
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -75,6 +77,35 @@ def ask(
         raise JevError(f"Unerwartete Antwort: {str(data)[:500]}")
     data["latency_ms"] = latency_ms
     return data
+
+
+# --- decision log (feeds dashboard/) ------------------------------------------
+
+def _log_path() -> Path:
+    return Path(os.environ.get("JEV_LOG_DIR", Path(__file__).resolve().parent.parent / "log")) / "jev_decisions.jsonl"
+
+
+def record(layer: str, state: Any, res: dict[str, Any], decision: dict[str, Any], **extra: Any) -> None:
+    """Append one line per layer evaluation: what was asked, what Jev answered, what
+    the code decided. Never logs API keys; state is what the model saw."""
+    try:
+        row = {
+            "ts": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "layer": layer,
+            "state": state,
+            "answers": res.get("answers"),
+            "decision": {k: v for k, v in decision.items() if k not in ("latency_ms", "cost_usd", "model")},
+            "latency_ms": res.get("latency_ms"),
+            "cost_usd": (res.get("usage") or {}).get("cost"),
+            "model": res.get("model"),
+            **extra,
+        }
+        path = _log_path()
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(row, ensure_ascii=False) + "\n")
+    except OSError:
+        pass
 
 
 # --- small helpers for reading answers ---------------------------------------

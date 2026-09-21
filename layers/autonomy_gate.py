@@ -12,7 +12,7 @@ from __future__ import annotations
 from typing import Any
 
 from . import config
-from .jev_client import ask, noul, noul_uncertain, score, score_tail_mass
+from .jev_client import ask, noul, noul_uncertain, record, score, score_tail_mass
 
 AUTONOMY_QUESTIONS: dict[str, dict[str, Any]] = {
     "fit": {
@@ -81,11 +81,13 @@ def decide(answers: dict[str, Any]) -> dict[str, Any]:
 
 
 def evaluate(request: str, draft: str) -> dict[str, Any]:
-    res = ask({"anfrage": request, "entwurf": draft}, AUTONOMY_QUESTIONS)
+    state = {"anfrage": request, "entwurf": draft}
+    res = ask(state, AUTONOMY_QUESTIONS)
     d = decide(res["answers"])
     d["latency_ms"] = res.get("latency_ms")
     d["cost_usd"] = res.get("usage", {}).get("cost")
     d["model"] = res.get("model")
+    record("autonomy_gate", state, res, d)
     return d
 
 

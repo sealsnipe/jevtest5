@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jev Entscheidungen</title>
+<style>
+:root {
+  color-scheme: light;
+  --surface: #fcfcfb; --card: #ffffff; --line: #e6e5e1;
+  --text: #0b0b0b; --text-2: #52514e; --muted: #8a8984;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #e87ba4; --s6: #008300; --s7: #4a3aa7; --s8: #e34948;
+  --good: #008300; --warn: #c98500; --serious: #eb6834; --critical: #e34948;
+  --bar-bg: #eeede9;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --surface: #1a1a19; --card: #232322; --line: #34342f;
+    --text: #ffffff; --text-2: #c3c2b7; --muted: #8f8e86;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
+    --good: #2fb52f; --warn: #d9a100; --serious: #d95926; --critical: #e66767;
+    --bar-bg: #2e2e2b;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface: #1a1a19; --card: #232322; --line: #34342f;
+  --text: #ffffff; --text-2: #c3c2b7; --muted: #8f8e86;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
+  --good: #2fb52f; --warn: #d9a100; --serious: #d95926; --critical: #e66767;
+  --bar-bg: #2e2e2b;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--surface); color: var(--text); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+header { display: flex; align-items: baseline; gap: 16px; padding: 20px 16px 8px; flex-wrap: wrap; }
+h1 { font-size: 20px; margin: 0; font-weight: 600; }
+header .sub { color: var(--text-2); }
+header .right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+button, select { font: inherit; color: var(--text); background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 5px 10px; cursor: pointer; }
+main { padding: 0 16px 40px; max-width: 1400px; margin: 0 auto; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 12px 0 18px; }
+.tile { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.tile .k { color: var(--text-2); font-size: 12px; }
+.tile .v { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.tile .d { color: var(--muted); font-size: 12px; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+@media (max-width: 800px) { .row { grid-template-columns: 1fr; } }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+.card h2 { font-size: 13px; font-weight: 600; color: var(--text-2); margin: 0 0 10px; text-transform: uppercase; letter-spacing: .04em; }
+.hbar { display: grid; grid-template-columns: 150px 1fr 40px; gap: 8px; align-items: center; margin: 4px 0; font-size: 13px; }
+.hbar .lbl { color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 6px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.hbar .trk { background: var(--bar-bg); height: 12px; border-radius: 3px; overflow: hidden; }
+.hbar .fill { height: 100%; border-radius: 0 3px 3px 0; }
+.hbar .n { text-align: right; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+.filters .chip { border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 3px 10px; cursor: pointer; font-size: 13px; display: flex; gap: 6px; align-items: center; }
+.filters .chip.on { border-color: var(--text); }
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; font-size: 12px; color: var(--text-2); font-weight: 600; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+td { padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr.main { cursor: pointer; }
+tr.main:hover { background: color-mix(in oklab, var(--card), var(--text) 4%); }
+td.ts { color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; font-size: 12px; }
+.tag { display: inline-flex; align-items: center; gap: 5px; border-radius: 999px; padding: 1px 9px; font-size: 12px; border: 1px solid var(--line); white-space: nowrap; }
+.tag .dot { width: 7px; height: 7px; }
+.res { font-weight: 600; }
+.res.good { color: var(--good); } .res.warn { color: var(--warn); } .res.serious { color: var(--serious); } .res.critical { color: var(--critical); }
+.about { color: var(--text); max-width: 640px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+tr.detail td { background: color-mix(in oklab, var(--card), var(--surface) 60%); padding: 10px 12px 14px 44px; }
+.det { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 800px) { .det { grid-template-columns: 1fr; } }
+.det h3 { font-size: 12px; color: var(--text-2); margin: 0 0 6px; text-transform: uppercase; letter-spacing: .04em; }
+.kv { font-size: 13px; margin: 2px 0; }
+.kv b { color: var(--text-2); font-weight: 500; }
+.state { white-space: pre-wrap; word-break: break-word; font-size: 13px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 8px; }
+.q { margin: 6px 0 10px; }
+.q .qn { font-size: 12px; color: var(--text-2); }
+.pb { display: grid; grid-template-columns: 120px 1fr 44px; gap: 6px; align-items: center; font-size: 12px; margin: 2px 0; }
+.pb .trk { background: var(--bar-bg); height: 8px; border-radius: 2px; overflow: hidden; }
+.pb .fill { height: 100%; background: var(--s1); border-radius: 0 2px 2px 0; }
+.pb.pick .fill { background: var(--s7); }
+.pb .n { text-align: right; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.empty { color: var(--muted); padding: 30px; text-align: center; }
+.small { font-size: 12px; color: var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Jev Entscheidungen</h1>
+  <span class="sub">Projekt Sekretärin · jede Zeile ist eine Jev-Auswertung mit Ergebnis</span>
+  <div class="right">
+    <span class="small" id="updated"></span>
+    <button id="reload">Neu laden</button>
+    <button id="theme" title="Hell/Dunkel">◐</button>
+  </div>
+</header>
+<main>
+  <section class="tiles" id="tiles"></section>
+  <section class="row">
+    <div class="card"><h2>Auswertungen je Layer</h2><div id="byLayer"></div></div>
+    <div class="card"><h2>Ergebnisse</h2><div id="byResult"></div></div>
+  </section>
+  <section class="card">
+    <h2>Verlauf</h2>
+    <div class="filters" id="filters"></div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Zeit</th><th>Layer</th><th>Worum ging es</th><th>Jev sagt</th><th>Ergebnis</th><th>ms</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+<script>
+const LAYERS = [
+  ["gatekeeper","Türsteher","--s1","Spam, Handlung, Dringlichkeit, Intent, Injection → block/drop/log/queue/urgent"],
+  ["autonomy_gate","Autonomie","--s2","Entwurf passt? Zusage? Risiko? → send/review"],
+  ["chef_reply","Chef-Antwort","--s3","Was meint der Chef? → freigabe/ablehnung/aenderung/…"],
+  ["matcher","Vorgangs-Zuordnung","--s4","Neue Nachricht → offener Vorgang oder neu"],
+  ["transcript_check","Transkript-Check","--s5","Sprachnachricht verständlich? abgebrochen?"],
+  ["action_gate","Aktions-Gate","--s6","Dateiaktion → execute/ask/refuse"],
+  ["voice_check","Voice-Check","--s7","Text als Sprachnachricht tauglich?"],
+];
+const LMAP = Object.fromEntries(LAYERS.map(l => [l[0], l]));
+const RES_CLASS = {
+  send:"good", execute:"good", freigabe:"good", queue:"good", true:"good",
+  log:"warn", ask:"warn", review:"warn", aenderung:"warn", rueckfrage:"warn", unklar:"warn", other:"warn", anweisung:"warn",
+  urgent:"serious", ablehnung:"serious", drop:"serious", false:"serious",
+  block:"critical", refuse:"critical",
+};
+const RES_ORDER = ["queue","urgent","log","drop","block","send","review","execute","ask","refuse","freigabe","ablehnung","aenderung","rueckfrage","anweisung","other","unklar","zugeordnet","neu","brauchbar","unbrauchbar","ok","nicht ok"];
+
+let data = null, filter = null;
+
+function result(r) {
+  const d = r.decision || {};
+  switch (r.layer) {
+    case "gatekeeper": return d.action;
+    case "autonomy_gate": return d.decision;
+    case "chef_reply": return d.kind;
+    case "matcher": return d.case_id ? "zugeordnet" : "neu";
+    case "transcript_check": return d.usable ? "brauchbar" : "unbrauchbar";
+    case "action_gate": return d.decision;
+    case "voice_check": return d.ok ? "ok" : "nicht ok";
+  }
+  return "?";
+}
+function resClass(res) {
+  return RES_CLASS[res] || (res === "zugeordnet" || res === "brauchbar" || res === "ok" ? "good" : res === "unbrauchbar" || res === "nicht ok" ? "serious" : "warn");
+}
+function about(r) {
+  const s = r.state || {};
+  if (typeof s === "string") return s;
+  return s.nachricht || s.antworttext || s.transkript || (s.entwurf ? "Entwurf: " + s.entwurf : null)
+      || (s.antwort_chef ? "Chef: " + s.antwort_chef : null)
+      || (s.aktion ? `${s.aktion} ${s.pfad}` : null) || JSON.stringify(s);
+}
+function jevSays(r) {
+  const a = r.answers || {}, d = r.decision || {};
+  const parts = [];
+  for (const [q, v] of Object.entries(a)) {
+    if ("noul" in v) parts.push(`${q} ${v.noul.toFixed(2)}`);
+    else if ("choice" in v) parts.push(`${q}=${v.choice} (${(v.confidence ?? 0).toFixed(2)})`);
+    else if ("score" in v) parts.push(`${q} ${v.score.toFixed(1)}`);
+  }
+  let extra = "";
+  if (d.escalated) extra = " · eskaliert";
+  else if (d.reasons && d.reasons.length) extra = " · " + d.reasons.join(", ");
+  else if (d.hints && d.hints.length) extra = " · " + d.hints[0];
+  return parts.join(" · ") + extra;
+}
+function fmtTs(ts) {
+  const d = new Date(ts); if (isNaN(d)) return ts || "";
+  return d.toLocaleDateString("de-DE", {day:"2-digit", month:"2-digit"}) + " " + d.toLocaleTimeString("de-DE", {hour:"2-digit", minute:"2-digit", second:"2-digit"});
+}
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+function render() {
+  const rows = data.jev.slice().reverse();
+  const shown = filter ? rows.filter(r => r.layer === filter) : rows;
+  // tiles
+  const n = rows.length, cost = rows.reduce((a, r) => a + (r.cost_usd || 0), 0);
+  const ms = rows.filter(r => r.latency_ms).map(r => r.latency_ms);
+  const avg = ms.length ? Math.round(ms.reduce((a, b) => a + b, 0) / ms.length) : 0;
+  const esc_ = rows.filter(r => r.decision && (r.decision.escalated || (r.decision.reasons || []).some(x => String(x).startsWith("unsicher")) || (r.decision.uncertain || []).length)).length;
+  const blocked = rows.filter(r => ["block","refuse","drop"].includes(result(r))).length;
+  const relayN = (data.relay || []).filter(r => !["rejected","error"].includes(r.relay_action)).length;
+  document.getElementById("tiles").innerHTML = [
+    ["Jev-Auswertungen", n, "seit Logstart"],
+    ["Gesamtkosten", "$" + cost.toFixed(4), "Input-Tokens, Output gratis"],
+    ["Ø Latenz", avg + " ms", "pro Request, alle Fragen parallel"],
+    ["Eskaliert", esc_, "unsicher → eine Stufe hoch"],
+    ["Abgewehrt", blocked, "block / drop / refuse"],
+    ["Telegram-Nachrichten", relayN, "durch das Relay"],
+  ].map(([k, v, d]) => `<div class="tile"><div class="k">${k}</div><div class="v">${v}</div><div class="d">${d}</div></div>`).join("");
+  // by layer
+  const byL = {}; rows.forEach(r => byL[r.layer] = (byL[r.layer] || 0) + 1);
+  const maxL = Math.max(1, ...Object.values(byL));
+  document.getElementById("byLayer").innerHTML = LAYERS.filter(l => byL[l[0]]).map(l =>
+    `<div class="hbar" title="${esc(l[3])}"><div class="lbl"><span class="dot" style="background:var(${l[2]})"></span>${l[1]}</div><div class="trk"><div class="fill" style="width:${100 * byL[l[0]] / maxL}%;background:var(${l[2]})"></div></div><div class="n">${byL[l[0]]}</div></div>`).join("") || `<div class="empty">Noch keine Daten</div>`;
+  // by result
+  const byR = {}; shown.forEach(r => { const k = result(r); byR[k] = (byR[k] || 0) + 1; });
+  const keys = Object.keys(byR).sort((a, b) => (RES_ORDER.indexOf(a) + 100) % 100 - (RES_ORDER.indexOf(b) + 100) % 100);
+  const maxR = Math.max(1, ...Object.values(byR));
+  document.getElementById("byResult").innerHTML = keys.map(k =>
+    `<div class="hbar"><div class="lbl"><span class="dot" style="background:var(--${resClass(k)})"></span>${k}</div><div class="trk"><div class="fill" style="width:${100 * byR[k] / maxR}%;background:var(--${resClass(k)})"></div></div><div class="n">${byR[k]}</div></div>`).join("") || `<div class="empty">Noch keine Daten</div>`;
+  // filters
+  document.getElementById("filters").innerHTML = `<span class="chip ${filter ? "" : "on"}" data-l="">Alle</span>` +
+    LAYERS.filter(l => byL[l[0]]).map(l => `<span class="chip ${filter === l[0] ? "on" : ""}" data-l="${l[0]}"><span class="dot" style="background:var(${l[2]})"></span>${l[1]}</span>`).join("");
+  document.querySelectorAll(".chip").forEach(c => c.onclick = () => { filter = c.dataset.l || null; render(); });
+  // rows
+  const tb = document.getElementById("rows");
+  tb.innerHTML = shown.length ? shown.map((r, i) => {
+    const l = LMAP[r.layer] || [r.layer, r.layer, "--s8", ""]; const res = result(r);
+    return `<tr class="main" data-i="${i}"><td class="ts">${fmtTs(r.ts)}</td><td><span class="tag"><span class="dot" style="background:var(${l[2]})"></span>${l[1]}</span></td><td class="about" title="${esc(about(r))}">${esc(about(r))}</td><td class="small">${esc(jevSays(r))}</td><td class="res ${resClass(res)}">${esc(res)}</td><td class="ts">${r.latency_ms ?? ""}</td></tr>`;
+  }).join("") : `<tr><td colspan="6" class="empty">Noch keine Entscheidungen. Showcase oder Smoke-Test laufen lassen, dann „Neu laden".</td></tr>`;
+  tb.querySelectorAll("tr.main").forEach(tr => tr.onclick = () => toggle(tr, shown[+tr.dataset.i]));
+  document.getElementById("updated").textContent = "Stand " + new Date().toLocaleTimeString("de-DE");
+}
+
+function toggle(tr, r) {
+  const next = tr.nextElementSibling;
+  if (next && next.classList.contains("detail")) { next.remove(); return; }
+  const l = LMAP[r.layer] || [r.layer, r.layer, "--s8", ""];
+  const a = r.answers || {};
+  const qs = Object.entries(a).map(([q, v]) => {
+    if ("noul" in v) return `<div class="q"><div class="qn">${q} (ja/nein)</div>${bar("ja", v.noul, v.noul >= 0.5)}${bar("nein", 1 - v.noul, v.noul < 0.5)}</div>`;
+    if ("choice" in v) return `<div class="q"><div class="qn">${q} (Auswahl, Konfidenz ${(v.confidence ?? 0).toFixed(2)})</div>${Object.entries(v.probabilities || {}).sort((x, y) => y[1] - x[1]).map(([k, p]) => bar(k, p, k === v.choice)).join("")}</div>`;
+    if ("score" in v) { const leg = v.legend || {}; return `<div class="q"><div class="qn">${q} (Stufe ${v.score.toFixed(2)}, Konfidenz ${(v.confidence ?? 0).toFixed(2)})</div>${Object.entries(v.probabilities || {}).map(([k, p]) => bar((leg[k] || k).slice(0, 40), p, Math.round(v.score) == k)).join("")}</div>`; }
+    return "";
+  }).join("");
+  const d = r.decision || {};
+  const dec = Object.entries(d).map(([k, v]) => `<div class="kv"><b>${k}</b> ${esc(Array.isArray(v) || typeof v === "object" ? JSON.stringify(v) : v)}</div>`).join("");
+  const det = document.createElement("tr"); det.className = "detail";
+  det.innerHTML = `<td colspan="6"><div class="det">
+    <div><h3>Was Jev gesehen hat</h3><div class="state">${esc(typeof r.state === "string" ? r.state : JSON.stringify(r.state, null, 1))}</div>
+      <p class="small">${esc(l[3])}<br>Modell ${esc(r.model || "?")} · ${r.latency_ms ?? "?"} ms · $${(r.cost_usd || 0).toFixed(5)}</p></div>
+    <div><h3>Antworten</h3>${qs}<h3 style="margin-top:10px">Entscheidung (Code, Schwellwerte in layers/config.py)</h3>${dec}</div>
+  </div></td>`;
+  tr.after(det);
+}
+function bar(label, p, pick) {
+  return `<div class="pb ${pick ? "pick" : ""}"><div title="${esc(label)}" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(label)}</div><div class="trk"><div class="fill" style="width:${Math.round(100 * p)}%"></div></div><div class="n">${(100 * p).toFixed(0)}%</div></div>`;
+}
+
+async function load() {
+  const r = await fetch("/api/decisions?limit=1000");
+  data = await r.json();
+  render();
+}
+document.getElementById("reload").onclick = load;
+document.getElementById("theme").onclick = () => {
+  const cur = document.documentElement.dataset.theme;
+  const dark = cur ? cur === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  document.documentElement.dataset.theme = dark ? "light" : "dark";
+  try { localStorage.setItem("theme", document.documentElement.dataset.theme); } catch (e) {}
+};
+try { const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+load();
+setInterval(load, 15000);
+</script>
+</body>
+</html>

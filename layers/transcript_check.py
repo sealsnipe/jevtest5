@@ -12,7 +12,7 @@ from __future__ import annotations
 from typing import Any
 
 from . import config
-from .jev_client import ask, noul
+from .jev_client import ask, noul, record
 
 TRANSCRIPT_QUESTIONS: dict[str, dict[str, Any]] = {
     "understandable": {
@@ -47,4 +47,5 @@ def evaluate(transcript: str, duration_s: float | None = None) -> dict[str, Any]
     d = decide(res["answers"])
     d["latency_ms"] = res.get("latency_ms")
     d["cost_usd"] = res.get("usage", {}).get("cost")
+    record("transcript_check", state, res, d)
     return d
