@@ -4,9 +4,20 @@ Telegram schickt nur seinen eigenen Secret-Header, der Grok-Bot-Webhook braucht
 `Authorization: Bearer <key>`. `app.py` sitzt dazwischen und lässt zusätzlich Layer 1+3
 (`layers.gatekeeper`) laufen, damit Grok Bot nur bei echten Anfragen geweckt wird.
 
+## Betrieb (Stand 2026-09-22)
+
+- **Empfang per Long Polling** (Default, wie OpenClaw): das Relay ruft `getUpdates` selbst auf. Kein Webhook,
+  kein Tunnel, keine DNS-Wartezeit. Latenz 0,5–2 s. `RELAY_MODE=webhook` schaltet auf `POST /telegram` um.
+- **Tunnel nur für den Rückkanal** `POST /reply` (Grok Bot → Relay). Die aktuelle URL steht in jedem Payload
+  (`relay_url`) und in `log/relay_url.txt`.
+- **Supervisor** `relay/supervisor.py`: hält Relay + Tunnel am Leben, meldet Neustarts per Telegram an den Chef.
+- **Doctor** `relay/doctor.py`: alle 10 min lokal / Tunnel / Polling-Heartbeat / Telegram prüfen, Alarm mit 1 h Cooldown.
+- Beide als Windows-Aufgaben: `powershell -File relay/install_tasks.ps1` (Sekretaerin Relay bei Anmeldung,
+  Sekretaerin Doctor alle 10 min). Kinderprozesse ohne Konsolenfenster.
+
 ## Ablauf
 
-1. `POST /telegram` – Header `X-Telegram-Bot-Api-Secret-Token` muss `TELEGRAM_WEBHOOK_SECRET` entsprechen.
+1. Update kommt per Polling (oder `POST /telegram` mit Secret-Header im Webhook-Modus).
 2. Text aus `message.text`; bei `message.voice` wird `text = "voice_pending"` und `voice_file = <file_id>`
    gesetzt (Transkription macht Grok Bot, Türsteher wird übersprungen, action `queue`).
 3. `gatekeeper.evaluate(text, sender_hint=...)` → action `block | drop | log | queue | urgent`.

@@ -104,10 +104,13 @@ Best Practices (aus TypeSafe-Docs):
 
 ## Offene Punkte
 
+- Relay empfängt per **Long Polling** (wie OpenClaw): Quick-Tunnel-Hostnamen brauchten bei Telegram 5+ min bis
+  zur DNS-Auflösung, Webhook nach jedem Neustart kaputt. Tunnel nur noch für `/reply`. Supervisor + Doctor als
+  Windows-Aufgaben (relay/install_tasks.ps1). Details relay/README.md.
 - Relay (relay/app.py) ist gebaut und getestet (2026-09-21): Relay → Jev → Grok-Bot-Webhook antwortet 200.
   Webhook-URL liegt auf `api2.cursor.sh/automations/webhook/<id>`, Key `crsr_…` (Grok Bot läuft auf
   Cursor-Infrastruktur). URL+Key nur im Routinen-Panel sichtbar, der Bot selbst kann sie nicht auslesen.
-  Offen: öffentlicher Tunnel + Telegram `setWebhook`.
+  Tunnel/Webhook erledigt (siehe oben).
 - Jev auf Deutsch: nicht belegt, wird mit Test 0 geprüft.
 - STT (Parakeet v3, GPU 0,44 s/12 s) und TTS (Piper de_DE-thorsten, 0,24 s/4,5 s) laufen lokal im Relay,
   siehe docs/stt_setup.md und relay/README.md (`POST /reply`). Bot-Token nur im Relay.
