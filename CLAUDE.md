@@ -24,15 +24,15 @@ Zwei Grundsätze:
 Telegram-User
    │  Text / Voice Note
    ▼
-Relay (relay/)  ── Jev Layer 1 "Türsteher"  ──► Grok-Bot-Webhook (Routine-Trigger)
-   │                (spam? wecken? dringlich? angriff?)
+Relay (relay/)  ── STT Parakeet v3 lokal ── Jev "Türsteher"+"Firewall" ──► Grok-Bot-Webhook
+   │  (Text; Voice → Text auf dem PC)        (spam? wecken? dringlich? angriff?)   (Routine "Empfang")
    ▼
-Grok Bot "Empfang"  ── STT (Parakeet v3 lokal ODER Grok STT) ──► Text
+Grok Bot "Empfang"  ──► Grok Bot "Sekretärin"  ── Excel (openpyxl) / Gmail / Calendar via Connectors
+   │                        │  Jev: Vorgangs-Zuordnung, Autonomie-Regler, Chef-Antwort, Aktions-Gate
+   │                        ▼
+   │                   POST <Relay>/reply  ── Jev Voice-Check ── Piper-TTS lokal ──► Telegram sendVoice/sendMessage
    ▼
-Grok Bot "Sekretärin" (Sub-Bot)  ── Mail / Excel / Docx / Kalender via Connectors
-   │  Entwurf
-   ▼
-Jev Layer 2 "Autonomie-Regler" ──► senden  |  Freigabe an Chef
+Freigabe an Chef per Telegram (from_chef) nur bei Aktion/"review"; Dashboard: dashboard/ (Port 8095)
 ```
 
 ## Jev-Layer (Reihenfolge der Umsetzung)
@@ -109,7 +109,8 @@ Best Practices (aus TypeSafe-Docs):
   Cursor-Infrastruktur). URL+Key nur im Routinen-Panel sichtbar, der Bot selbst kann sie nicht auslesen.
   Offen: öffentlicher Tunnel + Telegram `setWebhook`.
 - Jev auf Deutsch: nicht belegt, wird mit Test 0 geprüft.
-- STT läuft lokal im Relay (Parakeet v3 via onnx-asr, GPU 0,44 s / 12 s Audio), siehe docs/stt_setup.md.
+- STT (Parakeet v3, GPU 0,44 s/12 s) und TTS (Piper de_DE-thorsten, 0,24 s/4,5 s) laufen lokal im Relay,
+  siehe docs/stt_setup.md und relay/README.md (`POST /reply`). Bot-Token nur im Relay.
   Grok Bot bekommt fertigen Text (`transcribed: true`). Grok Bot hatte vorher eigenmächtig Gemini über
   OpenRouter genutzt: Key ist nur für Jev, steht jetzt in der Empfang-Routine.
 - Grok Bot hat Lesezugriff auf den lokalen PC (hat Dateien direkt aus `W:\` gelesen). Den

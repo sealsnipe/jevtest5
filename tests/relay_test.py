@@ -22,6 +22,7 @@ os.environ.update({
     "RELAY_LOG_DIR": TMP_LOG,
     "CHEF_CHAT_ID": "999",
     "TELEGRAM_BOT_TOKEN": "123:test-token",
+    "RELAY_API_KEY": "relay-key",
 })
 
 from fastapi.testclient import TestClient  # noqa: E402
@@ -154,6 +155,32 @@ def run() -> int:
         post.return_value.status_code = 200
         client.post("/telegram", json=tg_update("Test", chat_id=999), headers=HEADERS)
         check("test: bare 'Test' stays a chef message", not ev.called and post.call_args.kwargs["json"]["from_chef"] is True)
+
+    # 7. /reply: voice ok -> TTS + sendVoice; voice not ok -> sendMessage + hints; bad key -> unauthorized
+    RH = {"Authorization": "Bearer relay-key"}
+    ok_check = {"ok": True, "hints": [], "p_natural": 0.9, "p_one_topic": 0.9, "p_filler": 0.1}
+    bad_check = {"ok": False, "hints": ["zu lang: 60 Wörter, maximal 35"], "p_natural": 0.3, "p_one_topic": 0.5, "p_filler": 0.8}
+    tmp_ogg = Path(TMP_LOG) / "reply.ogg"; tmp_ogg.write_bytes(b"OggS")
+    with mock.patch.object(relay_app.voice_check, "evaluate", return_value=ok_check), \
+         mock.patch.object(relay_app.tts, "synthesize_ogg", return_value=(tmp_ogg, {"tts_ms": 5, "duration_s": 3.2})) as syn, \
+         mock.patch.object(relay_app.requests, "post") as post:
+        post.return_value.json.return_value = {"ok": True, "result": {"message_id": 77}}
+        r = client.post("/reply", json={"chat_id": 1234, "text": "Dienstag um zehn passt. Sehen wir uns?", "reply_to_message_id": 42}, headers=RH)
+        check("reply voice: sent as voice", r.json()["ok"] and r.json()["sent_as"] == "voice" and r.json()["message_id"] == 77)
+        check("reply voice: sendVoice called with file", "sendVoice" in post.call_args.args[0] and "voice" in post.call_args.kwargs["files"])
+        check("reply voice: synthesized the text", syn.call_args.args[0] == "Dienstag um zehn passt. Sehen wir uns?")
+    with mock.patch.object(relay_app.voice_check, "evaluate", return_value=bad_check), \
+         mock.patch.object(relay_app.tts, "synthesize_ogg") as syn, mock.patch.object(relay_app.requests, "post") as post:
+        post.return_value.json.return_value = {"ok": True, "result": {"message_id": 78}}
+        r = client.post("/reply", json={"chat_id": 1234, "text": "viel zu langer Text"}, headers=RH)
+        check("reply voice fails check: sent as text with hints", r.json()["sent_as"] == "text" and r.json()["voice_check"]["hints"] and not syn.called and "sendMessage" in post.call_args.args[0])
+    with mock.patch.object(relay_app.requests, "post") as post:
+        post.return_value.json.return_value = {"ok": True, "result": {"message_id": 79}}
+        r = client.post("/reply", json={"chat_id": 1234, "text": "Hallo", "mode": "text"}, headers=RH)
+        check("reply text mode: no voice check", r.json()["sent_as"] == "text" and r.json()["voice_check"] is None)
+    with mock.patch.object(relay_app.requests, "post") as post:
+        r = client.post("/reply", json={"chat_id": 1234, "text": "Hallo"}, headers={"Authorization": "Bearer wrong"})
+        check("reply: bad key rejected", r.json() == {"ok": False, "reason": "unauthorized"} and not post.called)
 
     # 6. update without message (e.g. sticker, channel post) -> ignored
     with mock.patch.object(relay_app.gatekeeper, "evaluate") as ev:

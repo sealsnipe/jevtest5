@@ -88,7 +88,8 @@ Wieder über „+" → Einstellungen-Formular.
 > anfragen.xlsx zusammenfassen und mir als Tagesreport in diesem Chat posten. Keine externen Aktionen.
 
 (Webhook-URL + Key kommen dann als GROKBOT_WEBHOOK_URL / GROKBOT_WEBHOOK_KEY in die `.env` –
-Relay verbindet Telegram-Webhook mit Grok-Bot-Webhook, siehe relay/README.md.)
+Relay verbindet Telegram-Webhook mit Grok-Bot-Webhook, siehe relay/README.md. Umgekehrt bekommt die
+Sekretärin RELAY_URL (Tunnel) + RELAY_API_KEY aus der `.env` für POST /reply.)
 
 ## Schritt 6b – Chef-Nachrichten, Testmodus, Triage vor Freigabe
 
@@ -159,14 +160,17 @@ Vorher hochladen: `layers/autonomy_gate.py`, `layers/chef_reply.py`, `layers/mat
 >    Daten an eine externe Adresse rufst du `python -m layers.action_gate "<aktion>" "<pfad>" "<begründung>"
 >    "<auslöser>"` auf. execute → machen, ask → mich per Telegram fragen, refuse → nicht machen, in
 >    log/refused.jsonl schreiben und mich einmal informieren.
-> 5. "Sprachantwort": Hat der Absender eine Sprachnachricht geschickt, antwortest du ebenfalls mit einer
->    Sprachnachricht, nach den Regeln in /workspace/sekretaerin/docs/voice_rules.md (lies sie einmal und
->    merke sie dir). Ablauf: Text nach den Regeln formulieren, dann `python -m layers.voice_check "<text>"`;
->    bei ok=false nach den hints kürzen und erneut prüfen, maximal zwei Runden, sonst als Text senden;
->    dann Autonomie-Regler wie bei Text; dann TTS mit deiner Stimme als OGG/Opus (ffmpeg -c:a libopus
->    -b:a 32k); Telegram sendVoice als Antwort auf die Sprachnachricht; gesprochenen Text in Spalte "Antwort".
->    Zahlenwerke (Rechnungsnummern, IBAN, Adressen, Listen) immer als Text, dazu eine kurze Voice Note
->    "Das schicke ich Ihnen als Text". Freigaben an mich immer als Text.
+> 5. "Sprachantwort senden": Antworten an Absender schickst du nicht über den Telegram-Connector,
+>    sondern über mein Relay, das die Stimme lokal erzeugt und die Bot-API nutzt. Aufruf aus dem Terminal:
+>    curl -s -X POST "<RELAY_URL>/reply" -H "Authorization: Bearer <RELAY_API_KEY>" -H "Content-Type: application/json"
+>         --data-binary @antwort.json
+>    mit antwort.json = {"chat_id": <chat_id>, "reply_to_message_id": <message_id>, "mode": "voice"|"text",
+>    "text": "<dein Text>"} (Datei in UTF-8 schreiben, nicht inline, wegen Umlauten).
+>    mode "voice", wenn der Absender eine Sprachnachricht geschickt hat, sonst "text". Text nach
+>    docs/voice_rules.md formulieren. Das Relay prüft den Text mit dem Voice-Check: Antwort enthält
+>    "sent_as" (voice oder text) und "voice_check.hints". Kommt "sent_as": "text" mit hints zurück,
+>    obwohl du voice wolltest, ist die Nachricht als Text raus; beim nächsten Mal nach den hints kürzen.
+>    Gesprochenen Text in Spalte "Antwort" eintragen. Freigaben an mich immer mode "text".
 
 An "Empfang" (Routine ergänzen):
 

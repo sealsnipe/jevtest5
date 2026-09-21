@@ -51,3 +51,15 @@ ersetzbar gelten (CLAUDE.md).
 Transkript der ersten echten Nachricht: „Testnachricht Hallo hier wäre um. Könnten wir eben über meine
 Rechnung reden vom zwölften Neunten zwanzig sechsundzwanzig?" – Eigenname „Werum" wurde zu „wäre um",
 Rest korrekt. Zahlen kommen als Wörter, das passt zum Türsteher.
+
+# Lokale Sprachsynthese: Piper im Relay
+
+- Engine `piper-tts` 1.8 (GPL), Stimme `de_DE-thorsten-medium` aus `rhasspy/piper-voices` (63 MB) nach
+  `models/piper/` (gitignored). Download:
+  `https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten/medium/de_DE-thorsten-medium.onnx` (+ `.onnx.json`).
+- Install: `pip install --no-deps piper-tts pathvalidate` (ohne `--no-deps` zieht es das CPU-`onnxruntime`
+  und kollidiert mit `onnxruntime-gpu`).
+- Windows-Falle: espeak-ng kann keine Nicht-ASCII-Pfade („Sekretärin"). `relay/tts.py` kopiert die
+  espeak-Daten einmalig nach `%LOCALAPPDATA%\piper\espeak-ng-data`.
+- Messwerte: laden 1,8 s (einmal), Synthese 0,24 s für 4,5 s Sprache, ffmpeg → Opus 0,12 s.
+- Erste echte Sprachantwort 2026-09-22 01:10 über `POST /reply` an Telegram: ok, message_id 19.

@@ -28,12 +28,13 @@ from typing import Any
 import requests
 from dotenv import load_dotenv
 from fastapi import FastAPI, Header, Request
+from pydantic import BaseModel
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
-from layers import gatekeeper  # noqa: E402
-from relay import stt  # noqa: E402
+from layers import gatekeeper, voice_check  # noqa: E402
+from relay import stt, tts  # noqa: E402
 
 LOG_DIR = Path(os.environ.get("RELAY_LOG_DIR", Path(__file__).resolve().parent.parent / "log"))
 WAKE_ACTIONS = {"queue", "urgent"}
@@ -56,6 +57,73 @@ def _warmup() -> None:
             _log("info", {"event": "stt_warmup", "model": stt.MODEL_NAME, "load_ms": ms})
         except Exception as e:  # noqa: BLE001
             _log("error", {"reason": f"stt warmup: {e}"})
+    if os.environ.get("RELAY_API_KEY"):
+        try:
+            ms = tts.warmup()
+            _log("info", {"event": "tts_warmup", "load_ms": ms})
+        except Exception as e:  # noqa: BLE001
+            _log("error", {"reason": f"tts warmup: {e}"})
+
+
+# --- Outbound: Grok Bot -> Relay -> Telegram (text or local-TTS voice note) ------------
+
+class Reply(BaseModel):
+    chat_id: int
+    text: str
+    reply_to_message_id: int | None = None
+    mode: str = "voice"          # "voice" | "text"
+    force: bool = False          # send as voice even if voice_check says no
+
+
+def _tg(method: str, **kwargs: Any) -> dict[str, Any]:
+    token = os.environ.get("TELEGRAM_BOT_TOKEN")
+    if not token:
+        raise RuntimeError("TELEGRAM_BOT_TOKEN nicht gesetzt")
+    files = kwargs.pop("files", None)
+    r = requests.post(f"https://api.telegram.org/bot{token}/{method}", data=kwargs, files=files, timeout=30)
+    data = r.json()
+    if not data.get("ok"):
+        raise RuntimeError(f"{method}: {data.get('description')}")
+    return data["result"]
+
+
+@app.post("/reply")
+def reply(body: Reply, authorization: str | None = Header(default=None)) -> dict[str, Any]:
+    """Send a reply to a Telegram chat on behalf of the secretary bot. mode=voice runs
+    layers.voice_check first; if the text breaks the voice rules it is sent as text and
+    the hints are returned so the bot can shorten and retry."""
+    key = os.environ.get("RELAY_API_KEY")
+    if not key or authorization != f"Bearer {key}":
+        return {"ok": False, "reason": "unauthorized"}
+
+    sent_as = "text"
+    check: dict[str, Any] | None = None
+    meta: dict[str, Any] = {}
+    try:
+        if body.mode == "voice":
+            check = voice_check.evaluate(body.text)
+            if check["ok"] or body.force:
+                ogg, meta = tts.synthesize_ogg(body.text)
+                try:
+                    with ogg.open("rb") as fh:
+                        res = _tg("sendVoice", chat_id=body.chat_id, reply_to_message_id=body.reply_to_message_id or "",
+                                  files={"voice": ("reply.ogg", fh, "audio/ogg")})
+                finally:
+                    ogg.unlink(missing_ok=True)
+                sent_as = "voice"
+            else:
+                res = _tg("sendMessage", chat_id=body.chat_id, text=body.text, reply_to_message_id=body.reply_to_message_id or "")
+        else:
+            res = _tg("sendMessage", chat_id=body.chat_id, text=body.text, reply_to_message_id=body.reply_to_message_id or "")
+    except Exception as e:  # noqa: BLE001
+        _log("error", {"reason": f"reply: {e}", "chat_id": body.chat_id, "text": body.text[:200]})
+        return {"ok": False, "reason": str(e), "voice_check": check}
+
+    out = {"ok": True, "sent_as": sent_as, "message_id": res.get("message_id"),
+           "voice_check": {k: check[k] for k in ("ok", "hints")} if check else None, **meta}
+    _log("reply", {"chat_id": body.chat_id, "text": body.text, "sent_as": sent_as, "mode": body.mode,
+                   "voice_check": check, **meta})
+    return out
 
 
 def _log(action: str, record: dict[str, Any]) -> None:

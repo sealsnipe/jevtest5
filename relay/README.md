@@ -22,6 +22,23 @@ Telegram schickt nur seinen eigenen Secret-Header, der Grok-Bot-Webhook braucht
 5. Jede Entscheidung landet in `log/<action>.jsonl`. `drop`/`log`/`block` wecken Grok Bot nicht.
 6. Antwort an Telegram ist immer HTTP 200 (sonst retried Telegram das Update).
 
+## Rückkanal: `POST /reply` (Grok Bot → Relay → Telegram)
+
+Header `Authorization: Bearer <RELAY_API_KEY>`, Body
+`{"chat_id", "text", "reply_to_message_id"?, "mode": "voice"|"text", "force"?: false}`.
+
+- `mode: voice`: erst `layers.voice_check` (Regeln aus docs/voice_rules.md). Bestanden → Piper-TTS lokal
+  (`relay/tts.py`, de_DE-thorsten-medium) → OGG/Opus → `sendVoice`. Nicht bestanden → `sendMessage` als
+  Text, Antwort enthält `voice_check.hints`. `force: true` erzwingt Sprache.
+- `mode: text`: `sendMessage`.
+- Antwort: `{"ok", "sent_as", "message_id", "voice_check", "tts_ms", "duration_s"}`; Log in `log/reply.jsonl`.
+
+Der Bot-Token bleibt damit ausschließlich im Relay. Grok Bot bekam ihn über die Secret-Karte nie in die Shell
+(nur Anzeigename, keine Env-Injektion), und der Composio-Connector hat kein `sendVoice`.
+
+Sprachnachrichten **rein** transkribiert das Relay ebenfalls lokal (`relay/stt.py`, Parakeet v3), siehe
+docs/stt_setup.md.
+
 ## Starten
 
 ```powershell

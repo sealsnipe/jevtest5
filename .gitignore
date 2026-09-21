@@ -6,3 +6,4 @@ log/
 *.xlsx
 *.env
 !.env.example
+models/
