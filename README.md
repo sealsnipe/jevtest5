@@ -4,7 +4,11 @@ KI-Sekretärin auf Basis von Grok Bot (xAI) mit Jev-Entscheidungslayern (TypeSaf
 erreichbar über Telegram mit Text und Sprachnachrichten. Transkription und Stimme laufen lokal.
 
 **Komplette Anleitung mit allen Grok-Bot-Prompts: [docs/SETUP.md](docs/SETUP.md).**
+**Was bei Grok Bot funktionierte und was nicht: [docs/grokbot_erfahrungen.md](docs/grokbot_erfahrungen.md).**
 Projektkontext: `CLAUDE.md`. Entstehungsprotokoll: `grokbot/RUNBOOK.md`. Messwerte: `docs/testlog.md`.
+
+Aus einem frischen Clone getestet (2026-09-22): Installation nach SETUP.md, Smoke-Test 14/14, Showcase 49/49,
+lokale Stimme und Transkription. Repo in einen Pfad ohne Umlaute klonen.
 
 ## Schnellstart (Test 0)
 
