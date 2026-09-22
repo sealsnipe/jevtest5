@@ -61,7 +61,7 @@ def ask(
         "Authorization": f"Bearer {_api_key()}",
         "Content-Type": "application/json",
         # Optional OpenRouter attribution headers
-        "HTTP-Referer": "https://github.com/sealsnipe/projekt-sekretaerin",
+        "HTTP-Referer": "https://github.com/sealsnipe/jevtest5",
         "X-Title": "Projekt Sekretaerin",
     }
     http = session or requests

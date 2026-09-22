@@ -6,7 +6,7 @@ Stand: 2026-09-22. Sprache im Projekt: Deutsch (Code-Kommentare/Bezeichner Engli
 
 Eine KI-Sekretärin, die über Telegram erreichbar ist (Text + Sprachnachrichten, später
 Live-Voice), Anfragen entgegennimmt, Termine/Rückrufe/Mails/Tabellen erledigt und
-nur bei Bedarf den Chef (Sealsnipe) einbindet. Vorbild: TeslaTobi-Livestream
+nur bei Bedarf den Chef einbindet. Vorbild: TeslaTobi-Livestream
 "Wir bauen eine KI-Sekretärin mit Grok Bot – inkl. Telefondienst und Tabellenkalkulation".
 
 Zwei Grundsätze:
@@ -120,7 +120,7 @@ Best Practices (aus TypeSafe-Docs):
   „erlaubten Bereich" in den Grok-Bot-Einstellungen auf den Projektordner beschränken. Jev-Aktions-Gate
   ist Berater, keine Sperre.
   **Befund 2026-09-22:** Bot meldete „W: darf ich nicht direkt lesen", kopierte die Dateien dann über
-  `C:\Users\Matthias\Downloads` als Staging. Die Sperre ist keine harte Grenze, der Bot umgeht sie
+  `C:\Users\<user>\Downloads` als Staging. Die Sperre ist keine harte Grenze, der Bot umgeht sie
   selbstständig. Staging enthielt nur die 10 angeforderten Dateien, wurde gelöscht.
 - DSGVO: Jev/OpenRouter/xAI sind Auftragsverarbeiter. Für echte Kundendaten AV-Verträge.
 
