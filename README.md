@@ -1,7 +1,10 @@
 # Projekt Sekretärin
 
-KI-Sekretärin auf Basis von Grok Bot (xAI) mit Jev-Entscheidungslayern (TypeSafe via OpenRouter).
-Projektkontext und Fakten: siehe `CLAUDE.md`. Anweisungen an Grok Bot: `grokbot/RUNBOOK.md`.
+KI-Sekretärin auf Basis von Grok Bot (xAI) mit Jev-Entscheidungslayern (TypeSafe via OpenRouter),
+erreichbar über Telegram mit Text und Sprachnachrichten. Transkription und Stimme laufen lokal.
+
+**Komplette Anleitung mit allen Grok-Bot-Prompts: [docs/SETUP.md](docs/SETUP.md).**
+Projektkontext: `CLAUDE.md`. Entstehungsprotokoll: `grokbot/RUNBOOK.md`. Messwerte: `docs/testlog.md`.
 
 ## Schnellstart (Test 0)
 

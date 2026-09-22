@@ -1,4 +1,7 @@
-# Runbook – Nachrichten an Grok Bot
+# Runbook – Nachrichten an Grok Bot (chronologisches Protokoll)
+
+> Die konsolidierte, aktuelle Anleitung mit allen Prompts steht in `docs/SETUP.md`. Diese Datei
+> dokumentiert die Reihenfolge, in der die Einrichtung tatsächlich stattfand, inklusive Umwegen.
 
 Diese Nachrichten gehen 1:1 in Grok Bot (Desktop-App). Reihenfolge einhalten.
 Vor jedem Schritt prüfen, ob der vorherige abgeschlossen ist. Nach jedem Schritt: Skill speichern lassen.
