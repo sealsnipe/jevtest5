@@ -112,7 +112,8 @@ In der App „+", dann rechts das Einstellungsformular:
 > du eine Testnachricht aus meinem Telegram-Chat lesen kannst.
 
 Hinweis: Sobald das Relay läuft, holt **das Relay** die Nachrichten ab. Der Connector kann dann nicht
-mehr lesen (Telegram erlaubt nur einen Abholer), das ist gewollt. Senden geht weiterhin.
+mehr lesen (Telegram erlaubt nur einen Abholer, der Connector bekommt Fehler 409), das ist gewollt.
+Senden und Dateien laden geht weiterhin. Wenn Empfang das meldet: ignorieren.
 
 ### 3. Jev-Layer hochladen und Türsteher-Skill
 
@@ -218,8 +219,8 @@ URL und Key stehen im Routinen-Panel (Chat-Kachel „Routinen"). Beides in die `
 >    "<auslöser>"`. execute → machen; ask → mich per Telegram fragen; refuse → nicht machen,
 >    log/refused.jsonl, mich einmal informieren.
 > 5. "Antwort senden": Antworten an Absender gehen über mein Relay, nicht über den
->    Telegram-Connector. Lege /workspace/sekretaerin/relay.env an mit RELAY_URL=<aktuelle URL> und
->    RELAY_API_KEY=<Key>. Ablauf: Text nach docs/voice_rules.md formulieren (lies die Datei einmal).
+>    Telegram-Connector. Lege /workspace/sekretaerin/relay.env an mit RELAY_URL=pending und
+>    RELAY_API_KEY=<Key>. RELAY_URL trägt Empfang automatisch ein, sobald das Relay läuft. Ablauf: Text nach docs/voice_rules.md formulieren (lies die Datei einmal).
 >    antwort.json in UTF-8 schreiben: {"chat_id", "reply_to_message_id", "mode": "voice"|"text",
 >    "text"}. mode "voice", wenn der Absender eine Sprachnachricht geschickt hat, sonst "text";
 >    Freigaben an mich immer "text". Senden: source /workspace/sekretaerin/relay.env && curl -s -X
@@ -229,9 +230,10 @@ URL und Key stehen im Routinen-Panel (Chat-Kachel „Routinen"). Beides in die `
 >    voice_check.hints; kam die Nachricht als Text raus, obwohl du voice wolltest, beim nächsten Mal
 >    nach den hints kürzen. Gesprochenen Text in Spalte "Antwort" eintragen.
 
-RELAY_API_KEY einmalig in diese Nachricht einsetzen (kein Secret-Karten-Umweg: die Secret-Eingabe
-reichte in unserem Test keine Werte in die Shell des Bots, nur der Bot selbst kann Secrets mit
-Variablennamen anfordern).
+`<Key>` ist derselbe Wert wie `RELAY_API_KEY` in deiner `.env`. Einmalig in diese Nachricht einsetzen
+(kein Secret-Karten-Umweg: die Secret-Eingabe reichte in unserem Test keine Werte in die Shell des Bots,
+nur der Bot selbst kann Secrets mit Variablennamen anfordern). Der Key kann nur Nachrichten über deinen
+Bot senden, er ist bewusst niedrigwertig.
 
 ### 7. Tagesreport (optional)
 
@@ -249,7 +251,12 @@ Start-ScheduledTask -TaskName "Sekretaerin Relay"
 ```
 
 Kein Telegram-Webhook nötig: das Relay pollt. Beim Start lädt es Parakeet (5 s) und Piper (2 s),
-startet den Tunnel und meldet die Tunnel-URL an Empfang (Schritt 5, Punkt 1).
+startet den Tunnel und meldet die Tunnel-URL an Empfang (Schritt 5, Punkt 1), der sie in `relay.env`
+einträgt.
+
+**Erster Start:** Parakeet wird einmalig heruntergeladen (2,5 GB). Solange antwortet das Relay nicht,
+der Doctor meldet dann einmal „lokal nicht erreichbar" per Telegram und später „wieder gesund". Das ist
+normal. Fortschritt: `log/supervisor.log`, fertig ist es mit `stt_warmup` in `log/info.jsonl`.
 
 Prüfen:
 
