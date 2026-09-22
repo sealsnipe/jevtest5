@@ -1,3 +1,6 @@
+> **Historisch (2026-09-21, 22:50).** Die Aufgaben 1–4 sind erledigt, der Stand hat sich seitdem stark
+> weiterentwickelt. Aktuelle Anleitung: `docs/SETUP.md`. Aktueller Projektstand: `CLAUDE.md`.
+
 # Übergabe an Claude Code – Projekt Sekretärin
 
 Stand: 2026-09-21, 22:50. Vorarbeit aus einer Claude-Chat-Session. Lies zuerst `CLAUDE.md`,

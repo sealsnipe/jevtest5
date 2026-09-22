@@ -1,6 +1,6 @@
 # Projekt Sekretärin – KI-Sekretärin mit Grok Bot + Jev
 
-Stand: 2026-09-21. Sprache im Projekt: Deutsch (Code-Kommentare/Bezeichner Englisch).
+Stand: 2026-09-22. Sprache im Projekt: Deutsch (Code-Kommentare/Bezeichner Englisch).
 
 ## Ziel
 
@@ -134,6 +134,9 @@ Best Practices (aus TypeSafe-Docs):
 
 ## Nächste Schritte
 
-1. `python tests/jev_smoke_test.py` ausführen (braucht `OPENROUTER_API_KEY`).
-2. Ergebnis bewerten: Trefferquote, Latenz, Kosten. Bei < 8/10 Treffern Kriterien nachschärfen.
-3. Layer 1 `layers/gatekeeper.py` finalisieren, dann `grokbot/RUNBOOK.md` Schritt 1–3 an Grok Bot geben.
+1. Frauenstimme: Chatterbox Multilingual (lokal, MIT) oder xAI-TTS (Cloud) als zweite Engine in `relay/tts.py`.
+2. Feste Relay-Adresse (ngrok-Subdomain oder Cloudflare-Tunnel mit Domain) statt Quick-Tunnel.
+3. Layer 2: eigene Frage „enthält Sachangaben, die nicht aus der Anfrage stammen" (siehe testlog).
+4. Layer 4 Vollständigkeit, Layer 5 QA-Spalte.
+5. Jev-Browser-Navigation für Grok Bot (Elementtabelle + choice), siehe jev-browser-skill-demo.
+6. Relay auf einen kleinen Server (Pi/VPS) statt Arbeits-PC, sobald echte Kunden schreiben.
